@@ -83,8 +83,7 @@ def ricerca_voli(request):
                 codice_iata__iexact=destinazione
             )
 
-        voli = voli.filter(destinazione__in=aeroporti)
-
+            voli = voli.filter(destinazione__in=aeroporti)
 
         if data_partenza:
             voli = voli.filter(orario_partenza__date=data_partenza)

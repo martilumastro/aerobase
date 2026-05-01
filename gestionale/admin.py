@@ -26,8 +26,14 @@ class AeroportoAdmin(admin.ModelAdmin):
 class VoloAdmin(admin.ModelAdmin):
     list_display = ('numero_volo', 'destinazione', 'orario_partenza', 'stato', 'id_aereo')
     list_filter = ('stato', 'destinazione', 'orario_partenza')
-    search_fields = ('numero_volo', 'destinazione')
+    search_fields = (
+        'numero_volo',
+        'destinazione__codice_iata',
+        'destinazione__citta',
+        'destinazione__nome_aeroporto',
+    )
     ordering = ('orario_partenza',)
+
 
 # Personalizzazione Passeggero
 @admin.register(Passeggero)
