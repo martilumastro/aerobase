@@ -30,10 +30,11 @@ class PasseggeroAdmin(admin.ModelAdmin):
 # Personalizzazione Prenotazione per vedere i posti occupati
 @admin.register(Prenotazione)
 class PrenotazioneAdmin(admin.ModelAdmin):
-    list_display = ('id_prenotazione', 'username_passeggero', 'id_volo', 'posto', 'classe', 'data_acquisto')
+    list_display = ('username_passeggero', 'id_volo', 'posto', 'classe', 'data_acquisto')
     list_filter = ('classe', 'data_acquisto')
-    # Rierca per nome del passeggero o per numero volo
+    # Ricerca per nome del passeggero o per numero volo
     search_fields = ('username_passeggero__cognome', 'id_volo__numero_volo')
+
 
 # Registrazione semplice per gli altri modelli
 admin.site.register(Compagnia_Aerea)
