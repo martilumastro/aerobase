@@ -1,0 +1,38 @@
+{% extends 'gestionale/base.html' %}
+{% load static %}
+
+{% block title %}Aerobase | Tabellone voli{% endblock %}
+
+{% block content %}
+<section class="flight-board">
+    <header class="flight-board-header">
+        <div>
+            <p class="eyebrow">Live</p>
+            <h1>Tabellone partenze</h1>
+        </div>
+
+        <div class="flight-board-clock">
+            <span id="board-date"></span>
+            <strong id="board-time"></strong>
+        </div>
+    </header>
+
+    <section class="flight-board-panel">
+        <div class="flight-board-grid flight-board-head">
+            <span>Volo</span>
+            <span>Da</span>
+            <span>A</span>
+            <span>Orario</span>
+            <span>Stimato</span>
+            <span>Gate</span>
+            <span>Stato</span>
+        </div>
+
+        <div id="board-body" class="flight-board-body">
+            <div class="flight-board-empty">Caricamento voli...</div>
+        </div>
+    </section>
+</section>
+
+<script src="{% static 'gestionale/js/tabellone.js' %}"></script>
+{% endblock %}

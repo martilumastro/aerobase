@@ -46,21 +46,36 @@ class Volo(models.Model):
         ('partito', 'Partito'),
         ('cancellato', 'Cancellato'),
     ]
+
     id_volo = models.AutoField(primary_key=True)
     numero_volo = models.CharField(max_length=10, unique=True)
     orario_partenza = models.DateTimeField()
     orario_arrivo = models.DateTimeField()
-    destinazione = models.ForeignKey(
-    Aeroporto,
-    on_delete=models.PROTECT,
-    db_column='destinazione'
+    
+
+    partenza = models.ForeignKey(
+        Aeroporto,
+        on_delete=models.PROTECT,
+        db_column='partenza',
+        related_name='voli_in_partenza'
     )
+
+    destinazione = models.ForeignKey(
+        Aeroporto,
+        on_delete=models.PROTECT,
+        db_column='destinazione',
+        related_name='voli_in_arrivo'
+    )
+
     id_aereo = models.ForeignKey(Aereo, on_delete=models.CASCADE, db_column='id_aereo')
     codice_gate = models.ForeignKey(Gate, on_delete=models.SET_NULL, null=True, blank=True, db_column='codice_gate')
     stato = models.CharField(max_length=20, choices=STATO_CHOICES, default='in_orario')
+    prezzo = models.DecimalField(max_digits=8, decimal_places=2)
+    ritardo_minuti = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'Volo'
+
 
 class Operatore(models.Model):
     RUOLO_CHOICES = [
@@ -93,6 +108,7 @@ class Passeggero(models.Model):
         db_table = 'Passeggero'
 
 class Prenotazione(models.Model):
+    id_prenotazione = models.AutoField(primary_key=True)
     CLASSE_CHOICES = [
         ('economy', 'Economy'),
         ('business', 'Business'),

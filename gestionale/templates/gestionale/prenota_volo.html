@@ -1,0 +1,88 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Prenota volo{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <div class="page-hero-content">
+        <p class="eyebrow">Prenotazione</p>
+        <h1>Conferma il tuo volo</h1>
+        <p class="muted">
+            Controlla i dettagli del viaggio e scegli posto e classe.
+        </p>
+    </div>
+</section>
+
+<section class="section booking-layout">
+    <article class="booking-summary">
+        <div class="booking-route">
+            <div>
+                <span class="muted">Da</span>
+                <h2>{{ volo.partenza.citta }}</h2>
+                <p>{{ volo.partenza.nome_aeroporto }} · {{ volo.partenza.codice_iata }}</p>
+            </div>
+
+            <div class="route-line"></div>
+
+            <div>
+                <span class="muted">A</span>
+                <h2>{{ volo.destinazione.citta }}</h2>
+                <p>{{ volo.destinazione.nome_aeroporto }} · {{ volo.destinazione.codice_iata }}</p>
+            </div>
+        </div>
+
+        <div class="booking-details">
+            <div>
+                <span class="muted">Volo</span>
+                <strong>{{ volo.numero_volo }}</strong>
+            </div>
+
+            <div>
+                <span class="muted">Partenza</span>
+                <strong>{{ volo.orario_partenza|date:"d/m/Y H:i" }}</strong>
+            </div>
+
+            <div>
+                <span class="muted">Arrivo</span>
+                <strong>{{ volo.orario_arrivo|date:"d/m/Y H:i" }}</strong>
+            </div>
+
+            <div>
+                <span class="muted">Aereo</span>
+                <strong>{{ volo.id_aereo.modello }}</strong>
+            </div>
+        </div>
+    </article>
+
+    <aside class="booking-form-card">
+        <p class="eyebrow">Totale</p>
+        <div class="price">€ {{ volo.prezzo }}</div>
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="field">
+                <label for="{{ form.posto.id_for_label }}">Posto</label>
+                {{ form.posto }}
+                {{ form.posto.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.classe.id_for_label }}">Classe</label>
+                {{ form.classe }}
+                {{ form.classe.errors }}
+            </div>
+
+            <button class="button button-primary full-width" type="submit">
+                Conferma prenotazione
+            </button>
+        </form>
+    </aside>
+</section>
+{% endblock %}

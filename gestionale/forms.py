@@ -71,23 +71,28 @@ class RegistrazionePasseggeroForm(UserCreationForm):
 
 
 class RicercaVoliForm(forms.Form):
-    #Form per filtrare voli
-    destinazione = forms.CharField(
-    max_length=80,
-    required=False,
-    label='Destinazione',
-    widget=forms.TextInput(attrs={
-        'placeholder': 'Roma, Fiumicino, FCO...'
+    partenza = forms.CharField(
+        max_length=80,
+        required=False,
+        label='Partenza',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Roma, Fiumicino, FCO...'
         })
     )
+
+    destinazione = forms.CharField(
+        max_length=80,
+        required=False,
+        label='Destinazione',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Milano, Malpensa, MXP...'
+        })
+    )
+
     data_partenza = forms.DateField(
         required=False,
-        # widget per mostrare il calendario nel browser
+        label='Data',
         widget=forms.DateInput(attrs={'type': 'date'})
-    )
-    stato = forms.ChoiceField(
-        required=False,
-        choices=[('', 'Qualsiasi stato')] + Volo.STATO_CHOICES
     )
 
 
@@ -107,6 +112,7 @@ class GestioneVoloForm(forms.ModelForm):
             'orario_arrivo',
             'id_aereo',
             'codice_gate',
+            'ritardo_minuti',
             'stato',
         )
         # Widget inserimento data e ora

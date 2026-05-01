@@ -5,6 +5,9 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from datetime import timedelta
+import random
+
 
 from .forms import (
     BagaglioForm,
@@ -24,19 +27,56 @@ def operatore_corrente(user):
     # profilo Operatore associato all'utente loggato
     return Operatore.objects.filter(id_user=user).first()
 
+def aggiorna_stati_voli():
+    adesso = timezone.now()
+
+    voli = Volo.objects.exclude(stato='cancellato')
+
+    for volo in voli:
+        orario_effettivo = volo.orario_partenza + timedelta(minutes=volo.ritardo_minuti)
+
+        if adesso >= orario_effettivo + timedelta(minutes=10):
+            nuovo_stato = 'partito'
+        elif adesso >= orario_effettivo - timedelta(minutes=30):
+            nuovo_stato = 'imbarco'
+        elif volo.ritardo_minuti > 0:
+            nuovo_stato = 'in_ritardo'
+        else:
+            nuovo_stato = 'in_orario'
+
+        if volo.stato != nuovo_stato:
+            volo.stato = nuovo_stato
+            volo.save(update_fields=['stato'])
+
+def simula_ritardi_voli():
+    adesso = timezone.now()
+    finestra = adesso + timedelta(hours=4)
+
+    voli = Volo.objects.filter(
+        orario_partenza__gte=adesso,
+        orario_partenza__lte=finestra,
+        stato='in_orario',
+        ritardo_minuti=0,
+    )
+
+    for volo in voli:
+        if random.random() < 0.08:
+            volo.ritardo_minuti = random.choice([10, 15, 20, 30, 45])
+            volo.save(update_fields=['ritardo_minuti'])
+
+
 # VIEW PUBBLICHE
 def home(request):
-    # Visualizza i primi 8 voli in partenza nella home page.
+    aggiorna_stati_voli()
     voli = (
         Volo.objects
-        .select_related('codice_gate', 'id_aereo', 'destinazione')
+        .select_related('codice_gate', 'destinazione')
         .order_by('orario_partenza')[:8]
     )
 
     return render(request, 'gestionale/home.html', {
         'voli': voli,
     })
-
 
 def registrazione_cliente(request):
     # Gestione creazione nuovo account passeggero.
@@ -58,24 +98,37 @@ def registrazione_cliente(request):
 
 
 def ricerca_voli(request):
-    # Filtro voli per destinazione, data e stato,
-    # Non modifico database --> GET
     form = RicercaVoliForm(request.GET or None)
 
     voli = (
         Volo.objects
-        .select_related('codice_gate', 'id_aereo', 'destinazione')
+        .select_related(
+            'partenza',
+            'destinazione',
+            'id_aereo',
+            'id_aereo__codice_vettore',
+        )
         .order_by('orario_partenza')
     )
 
     if form.is_valid():
+        partenza = form.cleaned_data.get('partenza')
         destinazione = form.cleaned_data.get('destinazione')
         data_partenza = form.cleaned_data.get('data_partenza')
-        stato = form.cleaned_data.get('stato')
 
-        
+        if partenza:
+            aeroporti_partenza = Aeroporto.objects.filter(
+                citta__icontains=partenza
+            ) | Aeroporto.objects.filter(
+                nome_aeroporto__icontains=partenza
+            ) | Aeroporto.objects.filter(
+                codice_iata__iexact=partenza
+            )
+
+            voli = voli.filter(partenza__in=aeroporti_partenza)
+
         if destinazione:
-            aeroporti = Aeroporto.objects.filter(
+            aeroporti_destinazione = Aeroporto.objects.filter(
                 citta__icontains=destinazione
             ) | Aeroporto.objects.filter(
                 nome_aeroporto__icontains=destinazione
@@ -83,18 +136,16 @@ def ricerca_voli(request):
                 codice_iata__iexact=destinazione
             )
 
-            voli = voli.filter(destinazione__in=aeroporti)
+            voli = voli.filter(destinazione__in=aeroporti_destinazione)
 
         if data_partenza:
             voli = voli.filter(orario_partenza__date=data_partenza)
-
-        if stato:
-            voli = voli.filter(stato=stato)
 
     return render(request, 'gestionale/ricerca_voli.html', {
         'form': form,
         'voli': voli,
     })
+
 
 #VIEW AREA CLIENTE (Richiedono Login)
 @login_required
@@ -246,27 +297,54 @@ def registra_bagaglio(request):
 # VIEW REAL-TIME (Tabellone Aeroporto)
 def tabellone(request):
     # Renderizza la pagina statica del tabellone (dati caricati via API)
+    simula_ritardi_voli()
+    aggiorna_stati_voli()
     return render(request, 'gestionale/tabellone.html')
 
 
 def api_tabellone(request):
     #Restituisce i dati dei voli in formato JSON per l'aggiornamento dinamico del tabellone
+    simula_ritardi_voli()
+    aggiorna_stati_voli()
+
+    adesso = timezone.now()
+    inizio_giorno = adesso.replace(hour=0, minute=0, second=0, microsecond=0)
+    fine_giorno = inizio_giorno + timedelta(days=1)
+
+    limite_vecchi = adesso - timedelta(minutes=20)
+
     voli = (
         Volo.objects
-        .select_related('codice_gate', 'destinazione')
+        .select_related('partenza', 'destinazione', 'codice_gate')
+        .filter(
+            orario_partenza__gte=inizio_giorno,
+            orario_partenza__lt=fine_giorno,
+        )
+        .exclude(
+            stato='cancellato'
+        )
+        .exclude(
+            stato='partito',
+            orario_partenza__lt=limite_vecchi
+        )
         .order_by('orario_partenza')[:30]
     )
 
     data = []
 
     for volo in voli:
+        orario_stimato = volo.orario_partenza + timedelta(minutes=volo.ritardo_minuti)
+
         data.append({
             'numero_volo': volo.numero_volo,
+            'partenza': f'{volo.partenza.citta} - {volo.partenza.codice_iata}',
             'destinazione': f'{volo.destinazione.citta} - {volo.destinazione.codice_iata}',
             'orario_partenza': timezone.localtime(volo.orario_partenza).strftime('%H:%M'),
-            'orario_arrivo': timezone.localtime(volo.orario_arrivo).strftime('%H:%M'),
+            'orario_stimato': timezone.localtime(orario_stimato).strftime('%H:%M'),
+            'ritardo_minuti': volo.ritardo_minuti,
             'gate': volo.codice_gate.codice_gate if volo.codice_gate else '-',
-            'stato': volo.get_stato_display(),
+            'stato': volo.stato,
+            'stato_label': volo.get_stato_display(),
         })
 
     return JsonResponse({

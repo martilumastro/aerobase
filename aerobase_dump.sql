@@ -31,7 +31,7 @@ CREATE TABLE `Aereo` (
   KEY `fk_aereo_compagnia` (`codice_vettore`),
   CONSTRAINT `fk_aereo_compagnia` FOREIGN KEY (`codice_vettore`) REFERENCES `Compagnia_Aerea` (`codice_vettore`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Aereo_chk_1` CHECK ((`capacita_passeggeri` > 0))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,6 +40,7 @@ CREATE TABLE `Aereo` (
 
 LOCK TABLES `Aereo` WRITE;
 /*!40000 ALTER TABLE `Aereo` DISABLE KEYS */;
+INSERT INTO `Aereo` VALUES (1,'Airbus A320',180,'AZA'),(2,'Boeing 737-800',189,'RYR'),(3,'Airbus A319',156,'EZY');
 /*!40000 ALTER TABLE `Aereo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -123,6 +124,7 @@ CREATE TABLE `Compagnia_Aerea` (
 
 LOCK TABLES `Compagnia_Aerea` WRITE;
 /*!40000 ALTER TABLE `Compagnia_Aerea` DISABLE KEYS */;
+INSERT INTO `Compagnia_Aerea` VALUES ('AZA','ITA Airways','Italia'),('EZY','easyJet','Regno Unito'),('RYR','Ryanair','Irlanda');
 /*!40000 ALTER TABLE `Compagnia_Aerea` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -146,6 +148,7 @@ CREATE TABLE `Gate` (
 
 LOCK TABLES `Gate` WRITE;
 /*!40000 ALTER TABLE `Gate` DISABLE KEYS */;
+INSERT INTO `Gate` VALUES ('A12','T1'),('B04','T1'),('C18','T2');
 /*!40000 ALTER TABLE `Gate` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -240,6 +243,7 @@ CREATE TABLE `Passeggero` (
 
 LOCK TABLES `Passeggero` WRITE;
 /*!40000 ALTER TABLE `Passeggero` DISABLE KEYS */;
+INSERT INTO `Passeggero` VALUES ('mario1','Mario','Rossi','mariorossi@mail.com',NULL,NULL,'Italiana',1);
 /*!40000 ALTER TABLE `Passeggero` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -251,12 +255,14 @@ DROP TABLE IF EXISTS `Prenotazione`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Prenotazione` (
+  `id_prenotazione` int NOT NULL AUTO_INCREMENT,
   `username_passeggero` varchar(20) NOT NULL,
   `id_volo` int NOT NULL,
   `data_acquisto` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `posto` char(5) NOT NULL,
   `classe` enum('economy','business','first') NOT NULL,
   PRIMARY KEY (`username_passeggero`,`id_volo`),
+  UNIQUE KEY `id_prenotazione` (`id_prenotazione`),
   KEY `fk_pren_volo` (`id_volo`),
   CONSTRAINT `fk_pren_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE,
   CONSTRAINT `fk_pren_volo` FOREIGN KEY (`id_volo`) REFERENCES `Volo` (`id_volo`) ON DELETE CASCADE
@@ -284,19 +290,25 @@ CREATE TABLE `Volo` (
   `numero_volo` varchar(10) NOT NULL,
   `orario_partenza` datetime NOT NULL,
   `orario_arrivo` datetime NOT NULL,
+  `partenza` char(3) NOT NULL,
   `destinazione` char(3) NOT NULL,
   `id_aereo` int NOT NULL,
   `codice_gate` varchar(10) DEFAULT NULL,
   `stato` enum('in_orario','in_ritardo','imbarco','partito','cancellato') NOT NULL DEFAULT 'in_orario',
+  `ritardo_minuti` int NOT NULL DEFAULT '0',
+  `prezzo` decimal(8,2) NOT NULL,
   PRIMARY KEY (`id_volo`),
   UNIQUE KEY `numero_volo` (`numero_volo`),
   KEY `fk_volo_aereo` (`id_aereo`),
   KEY `fk_volo_gate` (`codice_gate`),
   KEY `fk_volo_destinazione` (`destinazione`),
+  KEY `fk_volo_partenza` (`partenza`),
   CONSTRAINT `fk_volo_aereo` FOREIGN KEY (`id_aereo`) REFERENCES `Aereo` (`id_aereo`) ON DELETE CASCADE,
   CONSTRAINT `fk_volo_destinazione` FOREIGN KEY (`destinazione`) REFERENCES `Aeroporto` (`codice_iata`) ON UPDATE CASCADE,
-  CONSTRAINT `fk_volo_gate` FOREIGN KEY (`codice_gate`) REFERENCES `Gate` (`codice_gate`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_volo_gate` FOREIGN KEY (`codice_gate`) REFERENCES `Gate` (`codice_gate`) ON DELETE SET NULL,
+  CONSTRAINT `fk_volo_partenza` FOREIGN KEY (`partenza`) REFERENCES `Aeroporto` (`codice_iata`) ON UPDATE CASCADE,
+  CONSTRAINT `chk_ritardo_minuti` CHECK ((`ritardo_minuti` >= 0))
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,6 +317,7 @@ CREATE TABLE `Volo` (
 
 LOCK TABLES `Volo` WRITE;
 /*!40000 ALTER TABLE `Volo` DISABLE KEYS */;
+INSERT INTO `Volo` VALUES (1,'AZ1001','2026-05-03 23:26:47','2026-05-04 00:41:47','FCO','MXP',1,NULL,'in_orario',0,89.90),(2,'AZ1002','2026-05-04 23:26:47','2026-05-05 00:36:47','FCO','LIN',1,NULL,'in_orario',0,95.50),(3,'RY2201','2026-05-05 23:26:47','2026-05-06 01:06:47','CIA','BCN',2,NULL,'in_orario',0,64.99),(4,'EZY3301','2026-05-06 23:26:47','2026-05-07 01:11:47','MXP','CDG',3,NULL,'in_orario',0,78.00),(5,'AZ4401','2026-05-07 23:26:47','2026-05-08 01:26:47','FCO','AMS',1,NULL,'in_orario',0,122.00);
 /*!40000 ALTER TABLE `Volo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -409,7 +422,7 @@ CREATE TABLE `auth_user` (
   `date_joined` datetime(6) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -418,6 +431,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-01 21:00:21.605577',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -585,6 +599,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
+INSERT INTO `django_session` VALUES ('qbzs9r63xcybxu7ef99pu6f3g0qmw356','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wIuyD:GVlXqyyP4Y3gc983h1WSrrhOvXysqerR0wy5qoxbtWA','2026-05-15 21:00:21.619934');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -597,4 +612,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-01 20:55:48
+-- Dump completed on 2026-05-01 23:27:59

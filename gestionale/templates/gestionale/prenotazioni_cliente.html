@@ -1,0 +1,92 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Le mie prenotazioni{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <div class="page-hero-content">
+        <p class="eyebrow">Area cliente</p>
+        <h1>Ciao {{ user.username }}</h1>
+        <p class="muted">
+            Qui trovi le tue prenotazioni e gli aggiornamenti sui voli acquistati.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">I tuoi viaggi</p>
+            <h2>Prenotazioni</h2>
+        </div>
+        <a class="text-link" href="{% url 'gestionale:ricerca_voli' %}">Cerca un nuovo volo</a>
+    </div>
+
+    <div class="flight-results">
+        {% for prenotazione in prenotazioni %}
+            <article class="flight-card">
+                <div class="flight-main">
+                    <div>
+                        <span class="flight-code">
+                            {{ prenotazione.id_volo.numero_volo }}
+                        </span>
+
+                        <h3>
+                            {{ prenotazione.id_volo.partenza.citta }}
+                            <span>→</span>
+                            {{ prenotazione.id_volo.destinazione.citta }}
+                        </h3>
+
+                        <p class="muted">
+                            Posto {{ prenotazione.posto }} · Classe {{ prenotazione.get_classe_display }}
+                        </p>
+                    </div>
+
+                    <div class="flight-times">
+                        <div>
+                            <strong>{{ prenotazione.id_volo.orario_partenza|date:"H:i" }}</strong>
+                            <span>{{ prenotazione.id_volo.partenza.codice_iata }}</span>
+                        </div>
+
+                        <div class="flight-line"></div>
+
+                        <div>
+                            <strong>{{ prenotazione.id_volo.orario_arrivo|date:"H:i" }}</strong>
+                            <span>{{ prenotazione.id_volo.destinazione.codice_iata }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flight-meta">
+                    <div>
+                        <span class="muted">Data partenza</span>
+                        <strong>{{ prenotazione.id_volo.orario_partenza|date:"d/m/Y" }}</strong>
+                    </div>
+
+                    <div>
+                        <span class="muted">Stato</span>
+                        <strong class="status status-{{ prenotazione.id_volo.stato }}">
+                            {{ prenotazione.id_volo.get_stato_display }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span class="muted">Acquistato il</span>
+                        <strong>{{ prenotazione.data_acquisto|date:"d/m/Y" }}</strong>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <h3>Non hai ancora prenotazioni</h3>
+                <p class="muted">
+                    Cerca un volo disponibile e completa la prenotazione dal sito.
+                </p>
+                <a class="button button-primary" href="{% url 'gestionale:ricerca_voli' %}">
+                    Cerca voli
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
