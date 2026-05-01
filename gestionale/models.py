@@ -25,6 +25,19 @@ class Gate(models.Model):
     class Meta:
         db_table = 'Gate'
 
+class Aeroporto(models.Model):
+    codice_iata = models.CharField(max_length=3, primary_key=True)
+    nome_aeroporto = models.CharField(max_length=100)
+    citta = models.CharField(max_length=80)
+    nazione = models.CharField(max_length=80)
+    codice_icao = models.CharField(max_length=4, unique=True, null=True, blank=True)
+
+    class Meta:
+        db_table = 'Aeroporto'
+
+    def __str__(self):
+        return f'{self.citta} - {self.nome_aeroporto} ({self.codice_iata})'
+
 class Volo(models.Model):
     STATO_CHOICES = [
         ('in_orario', 'In Orario'),
@@ -37,7 +50,11 @@ class Volo(models.Model):
     numero_volo = models.CharField(max_length=10, unique=True)
     orario_partenza = models.DateTimeField()
     orario_arrivo = models.DateTimeField()
-    destinazione = models.CharField(max_length=3)
+    destinazione = models.ForeignKey(
+    Aeroporto,
+    on_delete=models.PROTECT,
+    db_column='destinazione'
+    )
     id_aereo = models.ForeignKey(Aereo, on_delete=models.CASCADE, db_column='id_aereo')
     codice_gate = models.ForeignKey(Gate, on_delete=models.SET_NULL, null=True, blank=True, db_column='codice_gate')
     stato = models.CharField(max_length=20, choices=STATO_CHOICES, default='in_orario')

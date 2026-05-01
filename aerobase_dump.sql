@@ -44,6 +44,34 @@ LOCK TABLES `Aereo` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `Aeroporto`
+--
+
+DROP TABLE IF EXISTS `Aeroporto`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Aeroporto` (
+  `codice_iata` char(3) NOT NULL,
+  `nome_aeroporto` varchar(100) NOT NULL,
+  `citta` varchar(80) NOT NULL,
+  `nazione` varchar(80) NOT NULL,
+  `codice_icao` char(4) DEFAULT NULL,
+  PRIMARY KEY (`codice_iata`),
+  UNIQUE KEY `codice_icao` (`codice_icao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Aeroporto`
+--
+
+LOCK TABLES `Aeroporto` WRITE;
+/*!40000 ALTER TABLE `Aeroporto` DISABLE KEYS */;
+INSERT INTO `Aeroporto` VALUES ('AMS','Amsterdam Schiphol','Amsterdam','Paesi Bassi','EHAM'),('BCN','Barcellona El Prat','Barcellona','Spagna','LEBL'),('BER','Berlino Brandenburg','Berlino','Germania','EDDB'),('BGY','Bergamo Orio al Serio','Milano','Italia','LIME'),('BLQ','Bologna Guglielmo Marconi','Bologna','Italia','LIPE'),('CDG','Parigi Charles de Gaulle','Parigi','Francia','LFPG'),('CIA','Roma Ciampino','Roma','Italia','LIRA'),('CTA','Catania Fontanarossa','Catania','Italia','LICC'),('FCO','Roma Fiumicino','Roma','Italia','LIRF'),('LGW','Londra Gatwick','Londra','Regno Unito','EGKK'),('LHR','Londra Heathrow','Londra','Regno Unito','EGLL'),('LIN','Milano Linate','Milano','Italia','LIML'),('MAD','Madrid Barajas','Madrid','Spagna','LEMD'),('MXP','Milano Malpensa','Milano','Italia','LIMC'),('NAP','Napoli Capodichino','Napoli','Italia','LIRN'),('ORY','Parigi Orly','Parigi','Francia','LFPO'),('PMO','Palermo Falcone Borsellino','Palermo','Italia','LICJ'),('TRN','Torino Caselle','Torino','Italia','LIMF'),('VCE','Venezia Marco Polo','Venezia','Italia','LIPZ');
+/*!40000 ALTER TABLE `Aeroporto` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `Bagaglio`
 --
 
@@ -264,7 +292,9 @@ CREATE TABLE `Volo` (
   UNIQUE KEY `numero_volo` (`numero_volo`),
   KEY `fk_volo_aereo` (`id_aereo`),
   KEY `fk_volo_gate` (`codice_gate`),
+  KEY `fk_volo_destinazione` (`destinazione`),
   CONSTRAINT `fk_volo_aereo` FOREIGN KEY (`id_aereo`) REFERENCES `Aereo` (`id_aereo`) ON DELETE CASCADE,
+  CONSTRAINT `fk_volo_destinazione` FOREIGN KEY (`destinazione`) REFERENCES `Aeroporto` (`codice_iata`) ON UPDATE CASCADE,
   CONSTRAINT `fk_volo_gate` FOREIGN KEY (`codice_gate`) REFERENCES `Gate` (`codice_gate`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -567,4 +597,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-01 17:42:10
+-- Dump completed on 2026-05-01 20:55:48

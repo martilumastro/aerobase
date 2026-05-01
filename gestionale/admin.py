@@ -3,6 +3,7 @@ from django.contrib import admin
 # Importazione di tutti i modelli definiti nell'app gestionale
 from .models import (
     Aereo,
+    Aeroporto,
     Bagaglio,
     Compagnia_Aerea,
     Gate,
@@ -12,6 +13,13 @@ from .models import (
     Prenotazione,
     Volo,
 )
+
+# Personalizzazione Aeroporto
+@admin.register(Aeroporto)
+class AeroportoAdmin(admin.ModelAdmin):
+    list_display = ('codice_iata', 'nome_aeroporto', 'citta', 'nazione', 'codice_icao')
+    search_fields = ('codice_iata', 'nome_aeroporto', 'citta', 'nazione')
+    list_filter = ('nazione', 'citta')
 
 # Personalizzazione Volo
 @admin.register(Volo)

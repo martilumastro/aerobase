@@ -1,0 +1,44 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Login{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card">
+        <p class="eyebrow">Accesso</p>
+        <h1>Accedi ad Aerobase</h1>
+        <p class="muted">
+            Usa le tue credenziali per gestire prenotazioni o operazioni aeroportuali.
+        </p>
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="field">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+                {{ form.password.errors }}
+            </div>
+
+            <button class="button button-primary full-width" type="submit">Entra</button>
+        </form>
+
+        <p class="auth-switch">
+            Non hai un account cliente?
+            <a href="{% url 'gestionale:registrazione_cliente' %}">Registrati</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Registrazione{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card auth-card-wide">
+        <p class="eyebrow">Nuovo cliente</p>
+        <h1>Crea il tuo account</h1>
+        <p class="muted">
+            Registrati per prenotare voli e consultare le tue prenotazioni.
+        </p>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors full-span">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-errors">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button class="button button-primary full-span" type="submit">
+                Crea account
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Hai già un account?
+            <a href="{% url 'login' %}">Accedi</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

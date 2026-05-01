@@ -13,7 +13,7 @@ from .forms import (
     RegistrazionePasseggeroForm,
     RicercaVoliForm,
 )
-from .models import Bagaglio, Gestione_Volo, Operatore, Passeggero, Prenotazione, Volo
+from .models import Aeroporto, Bagaglio, Gestione_Volo, Operatore, Passeggero, Prenotazione, Volo
 
 # FUNZIONI UTILITY
 def passeggero_corrente(user):
@@ -29,7 +29,7 @@ def home(request):
     # Visualizza i primi 8 voli in partenza nella home page.
     voli = (
         Volo.objects
-        .select_related('codice_gate', 'id_aereo')
+        .select_related('codice_gate', 'id_aereo', 'destinazione')
         .order_by('orario_partenza')[:8]
     )
 
@@ -64,7 +64,7 @@ def ricerca_voli(request):
 
     voli = (
         Volo.objects
-        .select_related('id_aereo', 'codice_gate')
+        .select_related('codice_gate', 'id_aereo', 'destinazione')
         .order_by('orario_partenza')
     )
 
@@ -73,9 +73,18 @@ def ricerca_voli(request):
         data_partenza = form.cleaned_data.get('data_partenza')
         stato = form.cleaned_data.get('stato')
 
+        
         if destinazione:
-            # iexact = case insensitive
-            voli = voli.filter(destinazione__iexact=destinazione)
+            aeroporti = Aeroporto.objects.filter(
+                citta__icontains=destinazione
+            ) | Aeroporto.objects.filter(
+                nome_aeroporto__icontains=destinazione
+            ) | Aeroporto.objects.filter(
+                codice_iata__iexact=destinazione
+            )
+
+        voli = voli.filter(destinazione__in=aeroporti)
+
 
         if data_partenza:
             voli = voli.filter(orario_partenza__date=data_partenza)
@@ -157,7 +166,7 @@ def lista_voli_operatore(request):
 
     voli = (
         Volo.objects
-        .select_related('id_aereo', 'codice_gate')
+        .select_related('codice_gate', 'id_aereo', 'destinazione')
         .order_by('orario_partenza')
     )
 
@@ -245,7 +254,7 @@ def api_tabellone(request):
     #Restituisce i dati dei voli in formato JSON per l'aggiornamento dinamico del tabellone
     voli = (
         Volo.objects
-        .select_related('codice_gate')
+        .select_related('codice_gate', 'destinazione')
         .order_by('orario_partenza')[:30]
     )
 
@@ -254,7 +263,7 @@ def api_tabellone(request):
     for volo in voli:
         data.append({
             'numero_volo': volo.numero_volo,
-            'destinazione': volo.destinazione,
+            'destinazione': f'{volo.destinazione.citta} - {volo.destinazione.codice_iata}',
             'orario_partenza': timezone.localtime(volo.orario_partenza).strftime('%H:%M'),
             'orario_arrivo': timezone.localtime(volo.orario_arrivo).strftime('%H:%M'),
             'gate': volo.codice_gate.codice_gate if volo.codice_gate else '-',

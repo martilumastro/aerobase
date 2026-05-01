@@ -72,7 +72,14 @@ class RegistrazionePasseggeroForm(UserCreationForm):
 
 class RicercaVoliForm(forms.Form):
     #Form per filtrare voli
-    destinazione = forms.CharField(max_length=3, required=False)
+    destinazione = forms.CharField(
+    max_length=80,
+    required=False,
+    label='Destinazione',
+    widget=forms.TextInput(attrs={
+        'placeholder': 'Roma, Fiumicino, FCO...'
+        })
+    )
     data_partenza = forms.DateField(
         required=False,
         # widget per mostrare il calendario nel browser
