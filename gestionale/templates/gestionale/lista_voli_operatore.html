@@ -1,0 +1,60 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Gestione Voli - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">Operativo Aeroporto</span>
+            <h2>Voli in Partenza</h2>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Codice</th>
+                    <th>Destinazione</th>
+                    <th>Orario</th>
+                    <th>Gate</th>
+                    <th>Aereo</th>
+                    <th>Stato</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for volo in voli %}
+                <tr>
+                    {# Usiamo |default per evitare spazi vuoti che rompono il layout #}
+                    <td><strong class="text-link">{{ volo.codice|default:"N/A" }}</strong></td>
+                    <td>{{ volo.destinazione.nome|default:"-" }}</td>
+                    <td>{{ volo.orario_partenza|date:"H:i" }}</td>
+                    <td>{{ volo.codice_gate.codice|default:"--" }}</td>
+                    <td>{{ volo.id_aereo.modello|default:"--" }}</td>
+                    <td>
+                        <span class="status status-{{ volo.stato|lower }}">
+                            {{ volo.get_stato_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if volo.pk %}
+                            <a href="{% url 'gestionale:modifica_volo' volo.pk %}" class="button" style="padding: 6px 12px; font-size: 0.8rem; display: inline-block;">
+                                Modifica
+                            </a>
+                        {% else %}
+                            <span style="color: red; font-size: 0.7rem;">ID NON TROVATO</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-row">Nessun volo assegnato al tuo aeroporto.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

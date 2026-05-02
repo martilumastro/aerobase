@@ -1,3 +1,4 @@
+import random
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -6,8 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from datetime import timedelta
-import random
-
+from django.db.models import Q
 
 from .forms import (
     BagaglioForm,
@@ -244,42 +244,49 @@ def lista_voli_operatore(request):
         'voli': voli,
     })
 
-
 @login_required
 def modifica_volo(request, volo_id):
-    # Modifica stato/orari di un volo e logga l'operazione.
+    # Recupera l'operatore e verifica i permessi
     operatore = operatore_corrente(request.user)
 
     if not operatore or operatore.ruolo not in ('admin', 'operatore_voli'):
         messages.error(request, 'Area riservata agli operatori voli.')
         return redirect('gestionale:home')
     
-    volo = get_object_or_404(Volo, pk=volo_id, partenza=operatore.aeroporto)
+    # MODIFICA QUI: Cerca il volo se l'aeroporto dell'operatore è Partenza OPPURE Destinazione
+    volo = get_object_or_404(
+        Volo, 
+        Q(partenza=operatore.aeroporto) | Q(destinazione=operatore.aeroporto), 
+        pk=volo_id
+    )
 
     if request.method == 'POST':
-        form = GestioneVoloForm(request.POST, instance=volo)
+        # MODIFICA QUI: Passiamo l'operatore al form come abbiamo previsto nel suo __init__
+        form = GestioneVoloForm(request.POST, instance=volo, operatore=operatore)
+        
         if form.is_valid():
             form.save()
-            # Registra chi ha fatto la modifica e quando in Gestione_Volo
+            
+            # Registra l'operazione nel log
             Gestione_Volo.objects.update_or_create(
                 codice_operatore=operatore,
                 id_volo=volo,
                 defaults={
                     'timestamp_modifica': timezone.now(),
-                    'tipo_operazione': 'modifica_stato',
+                    'tipo_operazione': 'modifica_operativa', # Nome generico che copre gate/orari
                 },
             )
 
-            messages.success(request, 'Volo aggiornato.')
+            messages.success(request, f'Volo {volo.codice} aggiornato correttamente.')
             return redirect('gestionale:lista_voli_operatore')
     else:
-        form = GestioneVoloForm(instance=volo)
+        # MODIFICA QUI: Passiamo l'operatore anche nella GET
+        form = GestioneVoloForm(instance=volo, operatore=operatore)
 
     return render(request, 'gestionale/modifica_volo.html', {
         'form': form,
         'volo': volo,
     })
-
 
 @login_required
 def registra_bagaglio(request):

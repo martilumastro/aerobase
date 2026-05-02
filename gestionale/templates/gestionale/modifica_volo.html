@@ -1,0 +1,89 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Modifica Volo {{ volo.codice }}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card auth-card-wide">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Gestione Operativa</span>
+                <h1>Modifica Volo {{ volo.codice }}</h1>
+                
+                {# 1. AGGIUNTA: Badge dinamico per capire subito se è un Arrivo o una Partenza #}
+                {% if volo.partenza == user.operatore.aeroporto %}
+                    <p class="status status-programmato" style="display: inline-block; margin-top: 10px;">
+                        🛫 VOLO IN PARTENZA ({{ volo.partenza.nome }})
+                    </p>
+                {% else %}
+                    <p class="status status-ritardo" style="display: inline-block; margin-top: 10px;">
+                        🛬 VOLO IN ARRIVO (da {{ volo.partenza.nome }})
+                    </p>
+                {% endif %}
+                
+                <p class="muted" style="margin-top: 10px;">
+                    Stai operando sul volo per <strong>{{ volo.destinazione.nome }}</strong>
+                </p>
+            </div>
+        </div>
+
+        {# 2. AGGIUNTA: Visualizzazione errori generali del form (es. il conflitto Gate) #}
+        {% if form.non_field_errors %}
+            <div class="field-errors" style="margin-bottom: 20px; padding: 15px; background: rgba(255, 71, 87, 0.1); border-radius: 8px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                {% for field in form %}
+                    {# 3. MIGLIORAMENTO: Se il campo è disabilitato, aggiungiamo una classe visiva #}
+                    <div class="field {% if field.field.disabled %}field-disabled{% endif %}">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.disabled %} <small>(Sola lettura)</small> {% endif %}
+                        </label>
+                        
+                        {{ field }}
+                        
+                        {% if field.errors %}
+                            <span class="field-errors">{{ field.errors|striptags }}</span>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <small class="muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions" style="margin-top: 30px; display: flex; gap: 15px;">
+                <button type="submit" class="button button-primary">
+                    Salva Modifiche
+                </button>
+                <a href="{% url 'gestionale:lista_voli_operatore' %}" class="button" style="background: var(--surface-soft); display: flex; align-items: center; justify-content: center;">
+                    Annulla
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Piccolo tocco di stile per i campi disabilitati */
+    .field-disabled input, .field-disabled select {
+        background-color: var(--surface-soft) !important;
+        cursor: not-allowed;
+        opacity: 0.7;
+        border-color: transparent !important;
+    }
+    .field-errors {
+        color: #ff4757;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+</style>
+{% endblock %}

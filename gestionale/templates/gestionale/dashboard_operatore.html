@@ -30,25 +30,30 @@
         <div class="dashboard-actions">
             <h3 class="dashboard-section-title">Azioni rapide</h3>
             <div class="operator-grid">
+                {# CARD VOLI: La mostriamo se è admin o operatore voli #}
                 {% if operatore.ruolo == 'admin' or operatore.ruolo == 'operatore_voli' %}
                     <a class="operator-card" href="{% url 'gestionale:lista_voli_operatore' %}">
                         <span class="operator-card-label">Voli</span>
                         <h2>Gestione voli</h2>
-                        <p>Modifica gate, ritardi, stato operativo e assegnazioni dei voli.</p>
+                        <p>Modifica gate, ritardi e stato operativo.</p>
                     </a>
                 {% endif %}
+
+                {# CARD BAGAGLI: La mostriamo se è admin o operatore bagagli #}
                 {% if operatore.ruolo == 'admin' or operatore.ruolo == 'operatore_bagagli' %}
                     <a class="operator-card" href="{% url 'gestionale:registra_bagaglio' %}">
                         <span class="operator-card-label">Bagagli</span>
                         <h2>Registrazione bagagli</h2>
-                        <p>Registra bagagli associati alle prenotazioni dei passeggeri.</p>
+                        <p>Registra bagagli associati alle prenotazioni.</p>
                     </a>
                 {% endif %}
+
+                {# CARD NUOVO OPERATORE: Solo per l'admin #}
                 {% if operatore.ruolo == 'admin' %}
                     <a class="operator-card" href="#">
                         <span class="operator-card-label">Admin</span>
                         <h2>Nuovo operatore</h2>
-                        <p>Crea account operatore associati al tuo aeroporto.</p>
+                        <p>Crea account operatore per il tuo aeroporto.</p>
                     </a>
                 {% endif %}
             </div>

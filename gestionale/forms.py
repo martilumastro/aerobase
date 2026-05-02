@@ -104,7 +104,6 @@ class PrenotazioneForm(forms.ModelForm):
 
 
 class GestioneVoloForm(forms.ModelForm):
-    #Form per operatore/admin per gestire i dettagli di un volo.
     class Meta:
         model = Volo
         fields = (
@@ -115,12 +114,58 @@ class GestioneVoloForm(forms.ModelForm):
             'ritardo_minuti',
             'stato',
         )
-        # Widget inserimento data e ora
         widgets = {
-            'orario_partenza': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'orario_arrivo': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'orario_partenza': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'input-field'}),
+            'orario_arrivo': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'input-field'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        # Recuperiamo l'operatore passato dalla view
+        self.operatore = kwargs.pop('operatore', None)
+        super().__init__(*args, **kwargs)
+        
+        volo = self.instance
+        
+        # ID Aereo sola lettura
+        self.fields['id_aereo'].disabled = True
+        
+        if self.operatore and self.operatore.aeroporto:
+            mio_aeroporto = self.operatore.aeroporto
+            
+            # CASO A: Il volo PARTE dal mio aeroporto
+            if volo.partenza == mio_aeroporto:
+                # Può modificare: Orario Partenza e Gate
+                # Bloccol'arrivo e lo stato (se vuoi sia automatico)
+                self.fields['orario_arrivo'].disabled = True
+                self.fields['ritardo_minuti'].disabled = True
+                # self.fields['stato'].disabled = True # Scommenta se lo stato è automatico
+                
+            # CASO B: Il volo ARRIVA nel mio aeroporto
+            elif volo.destinazione == mio_aeroporto:
+
+                self.fields['orario_partenza'].disabled = True
+                self.fields['orario_arrivo'].disabled = True
+                self.fields['ritardo_minuti'].disabled = True
+                self.fields['stato'].disabled = True
+    # METODO CLEAN
+    def clean(self):
+        cleaned_data = super().clean()
+        gate = cleaned_data.get('codice_gate')
+        
+        # Prendere l'orario effettivo (partenza o arrivo)
+        orario_riferimento = cleaned_data.get('orario_partenza') or self.instance.orario_partenza
+        
+        if gate and orario_riferimento:
+            # Controlla se il gate è occupato a quell'ora
+            conflitto = Volo.objects.filter(
+                codice_gate=gate,
+                orario_partenza=orario_riferimento
+            ).exclude(pk=self.instance.pk).exists()
+
+            if conflitto:
+                self.add_error('codice_gate', f"ATTENZIONE: Il Gate {gate} è già occupato per l'orario selezionato!")
+        
+        return cleaned_data
 
 class BagaglioForm(forms.ModelForm):
     class Meta:
