@@ -89,6 +89,14 @@ class Operatore(models.Model):
     email = models.EmailField(max_length=50, unique=True)
     cellulare = models.CharField(max_length=20, unique=True)
     ruolo = models.CharField(max_length=20, choices=RUOLO_CHOICES)
+    aeroporto = models.ForeignKey(
+    Aeroporto,
+    on_delete=models.PROTECT,
+    null=True,
+    blank=True,
+    db_column='codice_aeroporto',
+    related_name='operatori'
+    )
     id_user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_user')
 
     class Meta:

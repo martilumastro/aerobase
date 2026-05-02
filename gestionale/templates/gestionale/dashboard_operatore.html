@@ -1,0 +1,101 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Area operatore{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <div class="page-hero-content">
+        <p class="eyebrow">Area operatore</p>
+
+        {% if operatore.aeroporto %}
+            <h1>Gestione {{ operatore.aeroporto.nome_aeroporto }}</h1>
+            <p class="muted">
+                Benvenuto {{ operatore.nome }} {{ operatore.cognome }}.
+                Ruolo: {{ operatore.get_ruolo_display }}.
+            </p>
+        {% else %}
+            <h1>Area operatore</h1>
+            <p class="muted">
+                Benvenuto {{ operatore.nome }} {{ operatore.cognome }}.
+                Nessun aeroporto associato.
+            </p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="dashboard-layout">
+        
+        <!-- SINISTRA: azioni -->
+        <div class="dashboard-actions">
+            <h3 class="dashboard-section-title">Azioni rapide</h3>
+            <div class="operator-grid">
+                {% if operatore.ruolo == 'admin' or operatore.ruolo == 'operatore_voli' %}
+                    <a class="operator-card" href="{% url 'gestionale:lista_voli_operatore' %}">
+                        <span class="operator-card-label">Voli</span>
+                        <h2>Gestione voli</h2>
+                        <p>Modifica gate, ritardi, stato operativo e assegnazioni dei voli.</p>
+                    </a>
+                {% endif %}
+                {% if operatore.ruolo == 'admin' or operatore.ruolo == 'operatore_bagagli' %}
+                    <a class="operator-card" href="{% url 'gestionale:registra_bagaglio' %}">
+                        <span class="operator-card-label">Bagagli</span>
+                        <h2>Registrazione bagagli</h2>
+                        <p>Registra bagagli associati alle prenotazioni dei passeggeri.</p>
+                    </a>
+                {% endif %}
+                {% if operatore.ruolo == 'admin' %}
+                    <a class="operator-card" href="#">
+                        <span class="operator-card-label">Admin</span>
+                        <h2>Nuovo operatore</h2>
+                        <p>Crea account operatore associati al tuo aeroporto.</p>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DESTRA: anagrafica -->
+        <div class="dashboard-profile">
+            <h3 class="dashboard-section-title">Profilo operatore</h3>
+            <div class="profile-card">
+                <div class="profile-avatar">
+                    {{ operatore.nome|first }}{{ operatore.cognome|first }}
+                </div>
+                <div class="profile-info">
+                    <div class="profile-row">
+                        <span class="profile-label">Nome</span>
+                        <span class="profile-value">{{ operatore.nome }} {{ operatore.cognome }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Username</span>
+                        <span class="profile-value">{{ request.user.username }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email</span>
+                        <span class="profile-value">{{ operatore.email }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Cellulare</span>
+                        <span class="profile-value">{{ operatore.cellulare }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Ruolo</span>
+                        <span class="profile-value">{{ operatore.get_ruolo_display }}</span>
+                    </div>
+                    {% if operatore.aeroporto %}
+                    <div class="profile-row">
+                        <span class="profile-label">Aeroporto</span>
+                        <span class="profile-value">{{ operatore.aeroporto.nome_aeroporto }} ({{ operatore.aeroporto.codice_iata }})</span>
+                    </div>
+                    {% endif %}
+                    <div class="profile-row">
+                        <span class="profile-label">Codice</span>
+                        <span class="profile-value">{{ operatore.codice_operatore }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

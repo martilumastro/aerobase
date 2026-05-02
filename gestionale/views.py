@@ -64,6 +64,13 @@ def simula_ritardi_voli():
             volo.ritardo_minuti = random.choice([10, 15, 20, 30, 45])
             volo.save(update_fields=['ritardo_minuti'])
 
+@login_required
+def profilo(request):
+    operatore = operatore_corrente(request.user)
+    if operatore:
+        return redirect('gestionale:dashboard_operatore')
+    else:
+        return redirect('gestionale:prenotazioni_cliente')
 
 # VIEW PUBBLICHE
 def home(request):
@@ -206,6 +213,18 @@ def prenotazioni_cliente(request):
 
 # VIEW AREA OPERATORE (Gestione)
 @login_required
+def dashboard_operatore(request):
+    operatore = operatore_corrente(request.user)
+
+    if not operatore:
+        messages.error(request, 'Area riservata agli operatori.')
+        return redirect('gestionale:home')
+
+    return render(request, 'gestionale/dashboard_operatore.html', {
+        'operatore': operatore,
+    })
+
+@login_required
 # Elenco voli per lo staff con permessi di admin o operatore_voli
 def lista_voli_operatore(request):
     operatore = operatore_corrente(request.user)
@@ -215,9 +234,10 @@ def lista_voli_operatore(request):
         return redirect('gestionale:home')
 
     voli = (
-        Volo.objects
-        .select_related('codice_gate', 'id_aereo', 'destinazione')
-        .order_by('orario_partenza')
+    Volo.objects
+    .filter(partenza=operatore.aeroporto)
+    .select_related('partenza', 'destinazione', 'codice_gate', 'id_aereo')
+    .order_by('orario_partenza')
     )
 
     return render(request, 'gestionale/lista_voli_operatore.html', {
@@ -234,7 +254,7 @@ def modifica_volo(request, volo_id):
         messages.error(request, 'Area riservata agli operatori voli.')
         return redirect('gestionale:home')
     
-    volo = get_object_or_404(Volo, pk=volo_id)
+    volo = get_object_or_404(Volo, pk=volo_id, partenza=operatore.aeroporto)
 
     if request.method == 'POST':
         form = GestioneVoloForm(request.POST, instance=volo)

@@ -805,3 +805,139 @@ tr:last-child td {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   AREA OPERATORE - LAYOUT CORRETTO (FUORI DALLE MEDIA QUERY)
+   ========================================================================== */
+
+.dashboard-layout {
+    display: grid;
+    /* Divide in due colonne: Azioni (70%) e Profilo (30%) */
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    align-items: start;
+    margin-top: 32px;
+}
+
+.dashboard-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+
+/* Griglia Azioni (Sinistra) - Disposte su due colonne se c'è spazio */
+.operator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Card Cliccabili (Sinistra) */
+.operator-card {
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow);
+}
+
+.operator-card:hover {
+    border-color: var(--primary);
+    background: var(--surface-soft);
+    transform: translateY(-4px);
+}
+
+.operator-card-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+}
+
+.operator-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.operator-card p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Profilo (Destra) */
+.profile-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    padding: 32px;
+}
+
+.profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #071018;
+    /* Colore scuro del tuo bg per contrasto */
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.profile-row {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.profile-row:last-child {
+    border-bottom: none;
+}
+
+.profile-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.profile-value {
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* Responsive: Sotto i 1024px tutto su una colonna */
+@media (max-width: 1024px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-profile {
+        order: -1;
+        /* Mette il profilo sopra le azioni su mobile */
+    }
+
+    .operator-grid {
+        grid-template-columns: 1fr;
+        /* Una card per riga su mobile */
+    }
+}

@@ -27,4 +27,9 @@ urlpatterns = [
     path('tabellone/', views.tabellone, name='tabellone'),
     # Endpoint API per aggiornare il tabellone
     path('api/tabellone/', views.api_tabellone, name='api_tabellone'),
+    # Pagina dell'operatore
+    path('operatore/', views.dashboard_operatore, name='dashboard_operatore'),
+    # Profilo dopo login
+    path('profilo/', views.profilo, name='profilo'),
+
 ]

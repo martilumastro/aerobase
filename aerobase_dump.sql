@@ -194,11 +194,14 @@ CREATE TABLE `Operatore` (
   `email` varchar(50) NOT NULL,
   `cellulare` varchar(20) NOT NULL,
   `ruolo` enum('admin','operatore_voli','operatore_bagagli') NOT NULL,
+  `codice_aeroporto` char(3) DEFAULT NULL,
   `id_user` int DEFAULT NULL,
   PRIMARY KEY (`codice_operatore`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `cellulare` (`cellulare`),
   UNIQUE KEY `id_user` (`id_user`),
+  KEY `fk_operatore_aeroporto` (`codice_aeroporto`),
+  CONSTRAINT `fk_operatore_aeroporto` FOREIGN KEY (`codice_aeroporto`) REFERENCES `Aeroporto` (`codice_iata`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_operatore_user` FOREIGN KEY (`id_user`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -209,6 +212,7 @@ CREATE TABLE `Operatore` (
 
 LOCK TABLES `Operatore` WRITE;
 /*!40000 ALTER TABLE `Operatore` DISABLE KEYS */;
+INSERT INTO `Operatore` VALUES ('ADM-FCO','Admin','Fiumicino','admin.fco@aerobase.it','3000000001','admin','FCO',2),('BAG-FCO','Operatore','Bagagli','bagagli.fco@aerobase.it','3000000003','operatore_bagagli','FCO',4),('VOL-FCO','Operatore','Voli','voli.fco@aerobase.it','3000000002','operatore_voli','FCO',3);
 /*!40000 ALTER TABLE `Operatore` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -422,7 +426,7 @@ CREATE TABLE `auth_user` (
   `date_joined` datetime(6) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -431,7 +435,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-01 21:00:21.605577',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224');
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-01 21:00:21.605577',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-02 13:03:11.591449',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=',NULL,0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -599,7 +603,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('qbzs9r63xcybxu7ef99pu6f3g0qmw356','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wIuyD:GVlXqyyP4Y3gc983h1WSrrhOvXysqerR0wy5qoxbtWA','2026-05-15 21:00:21.619934');
+INSERT INTO `django_session` VALUES ('gk51u59p9gjnjbxuz3v47s1yy1m122n0','.eJxVjDsOwjAQBe_iGln-bdaipOcMlvcTEkCJFCcV4u4QKQW0b2bey5S6rUPZmi5lFHM2wZx-N6r80GkHcq_TbbY8T-sykt0Ve9Bmr7Po83K4fwdDbcO31hABAbDvUNCTB5ch9gLIkSOw1B6VAyXMQElTR-oRc_IukWOJYt4f0cI3qA:1wJ9zz:9EtUdR0WH4twf6jdVaK_jmwkiq7kmVcNamBefTANUuY','2026-05-16 13:03:11.615387');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -612,4 +616,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-01 23:27:59
+-- Dump completed on 2026-05-02 15:05:01
