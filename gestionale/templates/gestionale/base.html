@@ -10,39 +10,39 @@
     <link rel="stylesheet" href="{% static 'gestionale/css/style.css' %}">
 </head>
 <body>
-    <header class="site-header">
-        <div class="nav-links">
-            <!-- Link pubblici sempre visibili -->
-            <a href="{% url 'gestionale:home' %}">Home</a>
-            <a href="{% url 'gestionale:ricerca_voli' %}">Cerca voli</a>
-            <a href="{% url 'gestionale:tabellone' %}">Tabellone</a>
+   <header class="site-header">
+        <nav class="navbar">
+            <a href="{% url 'gestionale:home' %}" class="brand">
+                <span class="brand-name">AEROBASE</span>
+            </a>
 
-            {% if user.is_authenticated %}
-                
-                {% if user.is_staff %}
-                    {# L'operatore vede SOLO la dashboard e non le prenotazioni cliente #}
-                    <a href="{% url 'gestionale:dashboard_operatore' %}" class="nav-cta operator-link">
-                        ⚙️ Dashboard
-                    </a>
+            <div class="nav-links">
+                <a href="{% url 'gestionale:home' %}" class="nav-item">Home</a>
+                <a href="{% url 'gestionale:ricerca_voli' %}" class="nav-item">Cerca voli</a>
+                <a href="{% url 'gestionale:tabellone' %}" class="nav-item">Tabellone</a>
+
+                {% if user.is_authenticated %}
+                    <span class="nav-separator">|</span>
+
+                    {# Modifica qui: controlliamo is_staff OPPURE se esiste il profilo operatore #}
+                    {% if user.is_staff or user.operatore %}
+                        <a href="{% url 'gestionale:dashboard_operatore' %}" class="nav-item" style="color: var(--primary); font-weight: bold;">⚙️ Dashboard</a>
+                        <span class="user-nickname">{{ user.username }}</span>
+                    {% else %}
+                        <a href="{% url 'gestionale:prenotazioni_cliente' %}" class="nav-item">Le mie prenotazioni</a>
+                        <span class="user-name">{{ user.username }}</span>
+                    {% endif %}
+
+                    <form class="logout-form" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">Esci</button>
+                    </form>
                 {% else %}
-                    {# Il cliente vede le sue prenotazioni #}
-                    <a href="{% url 'gestionale:prenotazioni_cliente' %}">Le mie prenotazioni</a>
+                    <a href="{% url 'login' %}" class="nav-item">Login</a>
+                    <a href="{% url 'gestionale:registrazione_cliente' %}" class="nav-cta">Registrati</a>
                 {% endif %}
-
-                <!-- Info utente e logout sullo stesso livello per evitare bug di click -->
-                <span class="muted" style="margin: 0 10px;">|</span>
-                <span class="user-name" style="font-weight: bold; color: var(--primary);">{{ user.username }}</span>
-                
-                <form class="logout-form" method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn">Esci</button>
-                </form>
-
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a class="nav-cta" href="{% url 'gestionale:registrazione_cliente' %}">Registrati</a>
-            {% endif %}
-        </div>
+            </div>
+        </nav>
     </header>
 
     {% if messages %}

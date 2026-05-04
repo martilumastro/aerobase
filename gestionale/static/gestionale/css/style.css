@@ -762,13 +762,10 @@ tr:last-child td {
     }
 }
 
-/* ==========================================================================
-   AREA OPERATORE - LAYOUT CORRETTO (FUORI DALLE MEDIA QUERY)
-   ========================================================================== */
+/*AREA OPERATORE*/
 
 .dashboard-layout {
     display: grid;
-    /* Divide in due colonne: Azioni (70%) e Profilo (30%) */
     grid-template-columns: 1fr 340px;
     gap: 32px;
     align-items: start;
@@ -784,14 +781,13 @@ tr:last-child td {
     margin-bottom: 20px;
 }
 
-/* Griglia Azioni (Sinistra) - Disposte su due colonne se c'è spazio */
 .operator-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
 }
 
-/* Card Cliccabili (Sinistra) */
+/* Card */
 .operator-card {
     display: flex;
     flex-direction: column;
@@ -831,7 +827,7 @@ tr:last-child td {
     margin: 0;
 }
 
-/* Profilo (Destra) */
+/* Profilo */
 .profile-card {
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -846,7 +842,6 @@ tr:last-child td {
     border-radius: 50%;
     background: var(--primary);
     color: #071018;
-    /* Colore scuro del tuo bg per contrasto */
     font-size: 1.4rem;
     font-weight: 700;
     display: flex;
@@ -881,7 +876,7 @@ tr:last-child td {
     font-weight: 500;
 }
 
-/* Responsive: Sotto i 1024px tutto su una colonna */
+/* Responsive*/
 @media (max-width: 1024px) {
     .dashboard-layout {
         grid-template-columns: 1fr;
@@ -889,16 +884,14 @@ tr:last-child td {
 
     .dashboard-profile {
         order: -1;
-        /* Mette il profilo sopra le azioni su mobile */
     }
 
     .operator-grid {
         grid-template-columns: 1fr;
-        /* Una card per riga su mobile */
     }
 }
 
-/* Aspetti volo cliete*/
+/* Aspetti volo cliete */
 .status {
     padding: 4px 12px;
     border-radius: 20px;
@@ -907,7 +900,6 @@ tr:last-child td {
     font-weight: 700;
 }
 
-/* Colori dinamici basati sul tuo sistema */
 .status-in_orario {
     background: rgba(46, 230, 166, 0.1);
     color: var(--primary);
@@ -979,83 +971,109 @@ tr:last-child td {
     position: relative;
 }
 
-/* Fix per i risultati della ricerca */
 .flight-results {
     margin-top: 40px;
 }
 
 /* NAVBAR PRINCIPALE */
-/* NAVBAR: Layout orizzontale e distanziato */
 .navbar {
     display: flex !important;
-    /* Forza il flex */
+    flex-direction: row !important;
     justify-content: space-between !important;
-    /* Spinge i link a destra */
-    align-items: center;
-    padding: 1rem 5%;
-    background-color: var(--surface);
-    width: 100%;
+    /* Spinge Brand a SX e Links a DX */
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 5% !important;
+    /* Margine interno laterale */
+    height: 80px;
+    background: var(--surface);
 }
 
-/* LOGO: Cerchio rosso temporaneo */
+/* BRAND: Rimane ancorato a sinistra */
 .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    z-index: 30;
+    flex-shrink: 0;
+    /* Impedisce al logo di rimpicciolirsi */
 }
 
-/* cerchio rosso */
-.brand::before {
-    content: "";
-    width: 30px;
-    height: 30px;
-    background-color: #ff0000;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-/* LINK A DESTRA */
+/* NAV LINKS: Deve andare tutto a destra */
 .nav-links {
     display: flex !important;
     flex-direction: row !important;
-    align-items: center;
-    gap: 20px;
-    margin-left: auto;
+    align-items: center !important;
+    gap: 20px !important;
+    margin-left: auto !important;
+    /* Forza la spinta a destra se justify-content fallisce */
+    flex-wrap: nowrap !important;
 }
 
-/* FIX PER IL BOTTONE LOGOUT */
-.logout-form {
-    display: inline-block;
-    margin-left: 10px;
+/* Evitiamo che il testo vada a capo */
+.nav-item,
+.user-nickname,
+.logout-btn {
+    white-space: nowrap !important;
 }
 
-.logout-form button {
-    background: var(--surface-soft) !important;
-    border: 1px solid var(--line) !important;
-    color: var(--text) !important;
-    padding: 8px 15px !important;
-    border-radius: var(--radius);
-    cursor: pointer !important;
-    pointer-events: auto !important;
+/* Spaziatore tra i link */
+.nav-separator {
+    color: var(--line);
+    opacity: 0.5;
+}
+
+
+.user-nickname {
+    color: var(--primary);
+    background: rgba(46, 230, 166, 0.1);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    /* Effetto "terminale" per staff */
+    font-weight: bold;
+    border: 1px solid rgba(46, 230, 166, 0.3);
+}
+
+.user-name {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* Pulizia link */
+.nav-item {
     font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
 }
 
-.logout-form button:hover {
-    background: var(--danger) !important;
+.nav-item:hover {
+    color: var(--primary);
 }
 
+/* Bottone Logout */
+.logout-btn {
+    background: transparent !important;
+    border: 1px solid var(--danger) !important;
+    color: var(--danger) !important;
+    padding: 5px 12px !important;
+    border-radius: 4px;
+    line-height: 1 !important;
+    height: auto !important;
+}
 
-@media (max-width: 860px) {
-    .navbar {
-        flex-direction: row !important;
-        padding: 10px 20px !important;
-    }
+.logout-btn:hover {
+    border-color: var(--danger) !important;
+    border-radius: var(--radius);
+    background: rgba(255, 92, 112, 0.05) !important;
+}
+
+.logout-form {
+    display: flex !important;
+    align-items: center;
+    margin: 0 !important;
 }
 
 /* GESTIONE STAFF*/
-/* Card del Form con più respiro */
 .auth-card.staff-form-card {
     padding: 40px !important;
     background: var(--surface-soft) !important;
