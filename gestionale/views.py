@@ -10,7 +10,6 @@ from datetime import timedelta
 from django.db.models import Q
 from django.db.models import Count
 from django.contrib.auth.models import User
-from .models import Operatore
 
 from .forms import (
     BagaglioForm,
@@ -308,35 +307,54 @@ def modifica_volo(request, volo_id):
 
 @login_required
 def registra_bagaglio(request):
-    # Gestisce l'accettazione dei bagagli al check-in.
     operatore = operatore_corrente(request.user)
 
+    # Controllo permessi
     if not operatore or operatore.ruolo not in ('admin', 'operatore_bagagli'):
         messages.error(request, 'Area riservata agli operatori bagagli.')
-        return redirect('gestionale:home')
+        return redirect('gestionale:dashboard_operatore')
 
-    if request.method == 'POST':
-        form = BagaglioForm(request.POST)
+    prenotazione_trovata = None
+    username_query = request.GET.get('username_ricerca')
 
-        if form.is_valid():
-            bagaglio = form.save(commit=False)
-            bagaglio.codice_operatore = operatore
-            bagaglio.save()
+    # Step 1: Ricerca della prenotazione (Check-in)
+    if username_query:
+        # Cerchiamo se esiste una prenotazione per questo username
+        # Usiamo .filter().first() per evitare errori se non esiste
+        prenotazione_trovata = Prenotazione.objects.filter(
+            username_passeggero=username_query
+        ).first()
+        
+        if not prenotazione_trovata:
+            messages.error(request, f"Nessuna prenotazione attiva per: {username_query}")
 
-            messages.success(request, 'Bagaglio registrato.')
+    # Step 2: Salvataggio Bagaglio
+    if request.method == 'POST' and 'conferma_bagaglio' in request.POST:
+        # Recuperiamo i dati manualmente dal POST per avere massimo controllo
+        try:
+            nuovo_bagaglio = Bagaglio.objects.create(
+                peso_kg=request.POST.get('peso_kg'),
+                tipo=request.POST.get('tipo'),
+                passeggero_id=request.POST.get('passeggero_id'), # ID dallo hidden field
+                volo_id=request.POST.get('volo_id'),             # ID dallo hidden field
+                codice_operatore=operatore # Assegnato automaticamente dall'operatore loggato
+            )
+            messages.success(request, 'Bagaglio registrato con successo.')
             return redirect('gestionale:registra_bagaglio')
-    else:
-        form = BagaglioForm()
+        except Exception as e:
+            messages.error(request, f"Errore nel salvataggio: {e}")
 
-    bagagli = (
+    # Lista degli ultimi bagagli registrati (come nel tuo codice originale)
+    ultimi_bagagli = (
         Bagaglio.objects
-        .select_related('prenotazione_passeggero', 'prenotazione_volo')
-        .order_by('-id_bagaglio')[:20]
+        .select_related('passeggero', 'volo')
+        .order_by('-id_bagaglio')[:10]
     )
 
     return render(request, 'gestionale/registra_bagaglio.html', {
-        'form': form,
-        'bagagli': bagagli,
+        'prenotazione': prenotazione_trovata,
+        'bagagli': ultimi_bagagli,
+        'query': username_query
     })
 
 @login_required

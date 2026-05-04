@@ -170,9 +170,5 @@ class GestioneVoloForm(forms.ModelForm):
 class BagaglioForm(forms.ModelForm):
     class Meta:
         model = Bagaglio
-        fields = (
-            'prenotazione_passeggero',
-            'prenotazione_volo',
-            'peso_kg',
-            'tipo',
-        )
+        # Cambia i nomi dei campi qui sotto:
+        fields = ['peso_kg', 'tipo', 'passeggero', 'volo']

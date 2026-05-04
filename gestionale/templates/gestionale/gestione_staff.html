@@ -32,26 +32,52 @@
             </table>
         </div>
 
-        <!-- Form Nuovo Operatore -->
-        <div class="auth-card">
-            <h3>Aggiungi Operatore</h3>
-            <form method="post">
-                {% csrf_token %}
-                <input type="text" name="nome" placeholder="Nome" required class="form-input">
-                <input type="text" name="cognome" placeholder="Cognome" required class="form-input">
-                <input type="text" name="username" placeholder="Username" required class="form-input">
-                <input type="email" name="email" placeholder="Email" required class="form-input">
-                <input type="password" name="password" placeholder="Password" required class="form-input">
-                
+        <!-- Form -->
+        <div class="auth-card staff-form-card">
+        <h3 class="form-title">Aggiungi Operatore</h3>
+        
+        <form method="post" class="staff-management-form">
+            {% csrf_token %}
+            
+            <div class="staff-form-group">
+                <label>Nome</label>
+                <input type="text" name="nome" placeholder="Es. Mario" required class="form-input">
+            </div>
+
+            <div class="staff-form-group">
+                <label>Cognome</label>
+                <input type="text" name="cognome" placeholder="Es. Rossi" required class="form-input">
+            </div>
+
+            <div class="staff-form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="mrossi_fco" required class="form-input">
+            </div>
+
+            <div class="staff-form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="mario.rossi@aeroporto.it" required class="form-input">
+            </div>
+
+            <div class="staff-form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="********" required class="form-input">
+            </div>
+            
+            <div class="staff-form-group">
+                <label>Ruolo Operatore</label>
                 <select name="ruolo" class="form-input">
                     <option value="operatore_voli">Operatore Voli</option>
                     <option value="operatore_bagagli">Operatore Bagagli</option>
-                    <option value="admin">Admin</option>
+                    <option value="admin">Amministratore (Admin)</option>
                 </select>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Registra</button>
-            </form>
-        </div>
+            </div>
+            
+            <button type="submit" class="btn-submit-staff">
+                Registra Operatore
+            </button>
+        </form>
+    </div>
     </div>
 </section>
 {% endblock %}
