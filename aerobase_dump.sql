@@ -86,6 +86,8 @@ CREATE TABLE `Bagaglio` (
   `username_passeggero` varchar(20) NOT NULL,
   `id_volo` int NOT NULL,
   `codice_operatore` varchar(20) NOT NULL,
+  `stato` enum('in_attesa','imbarcato','consegnato','smarrito','ritrovato') DEFAULT 'in_attesa',
+  `data_aggiornamento` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_bagaglio`),
   KEY `fk_bag_prenotazione` (`username_passeggero`,`id_volo`),
   KEY `fk_bag_operatore` (`codice_operatore`),
@@ -321,7 +323,7 @@ CREATE TABLE `Volo` (
 
 LOCK TABLES `Volo` WRITE;
 /*!40000 ALTER TABLE `Volo` DISABLE KEYS */;
-INSERT INTO `Volo` VALUES (1,'AZ1001','2026-05-03 23:26:47','2026-05-04 00:41:47','FCO','MXP',1,NULL,'in_orario',0,89.90),(2,'AZ1002','2026-05-04 23:26:47','2026-05-05 00:36:47','FCO','LIN',1,NULL,'in_orario',0,95.50),(3,'RY2201','2026-05-05 23:26:47','2026-05-06 01:06:47','CIA','BCN',2,NULL,'in_orario',0,64.99),(4,'EZY3301','2026-05-06 23:26:47','2026-05-07 01:11:47','MXP','CDG',3,NULL,'in_orario',0,78.00),(5,'AZ4401','2026-05-07 23:26:47','2026-05-08 01:26:47','FCO','AMS',1,NULL,'in_orario',0,122.00);
+INSERT INTO `Volo` VALUES (1,'AZ1001','2026-05-03 23:26:47','2026-05-04 00:41:47','FCO','MXP',1,NULL,'partito',0,89.90),(2,'AZ1002','2026-05-04 23:26:47','2026-05-05 00:36:47','FCO','LIN',1,NULL,'in_orario',0,95.50),(3,'RY2201','2026-05-05 23:26:47','2026-05-06 01:06:47','CIA','BCN',2,NULL,'in_orario',0,64.99),(4,'EZY3301','2026-05-06 23:26:47','2026-05-07 01:11:47','MXP','CDG',3,NULL,'in_orario',0,78.00),(5,'AZ4401','2026-05-07 23:26:47','2026-05-08 01:26:47','FCO','AMS',1,NULL,'in_orario',0,122.00);
 /*!40000 ALTER TABLE `Volo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -435,7 +437,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-01 21:00:21.605577',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-02 13:03:11.591449',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=',NULL,0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-04 12:32:03.844442',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-04 12:28:39.844538',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=',NULL,0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -603,7 +605,6 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('gk51u59p9gjnjbxuz3v47s1yy1m122n0','.eJxVjDsOwjAQBe_iGln-bdaipOcMlvcTEkCJFCcV4u4QKQW0b2bey5S6rUPZmi5lFHM2wZx-N6r80GkHcq_TbbY8T-sykt0Ve9Bmr7Po83K4fwdDbcO31hABAbDvUNCTB5ch9gLIkSOw1B6VAyXMQElTR-oRc_IukWOJYt4f0cI3qA:1wJ9zz:9EtUdR0WH4twf6jdVaK_jmwkiq7kmVcNamBefTANUuY','2026-05-16 13:03:11.615387');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -616,4 +617,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-02 15:05:01
+-- Dump completed on 2026-05-04 21:56:08

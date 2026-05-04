@@ -192,16 +192,16 @@ def prenota_volo(request, volo_id):
         'volo': volo,
     })
 
-
 @login_required
 def prenotazioni_cliente(request):
-    # Mostra storico delle prenotazioni dell'utente loggato.
+    # Identificazione il passeggero
     passeggero = passeggero_corrente(request.user)
-
+    
     if not passeggero:
         messages.error(request, 'Area riservata ai clienti.')
         return redirect('gestionale:home')
 
+    # Query per le prenotazioni
     prenotazioni = (
         Prenotazione.objects
         .filter(username_passeggero=passeggero)
@@ -209,8 +209,28 @@ def prenotazioni_cliente(request):
         .order_by('-data_acquisto')
     )
 
+    # Recupero bagagli notifiche
+    bagagli_alert = Bagaglio.objects.filter(
+        passeggero=request.user.passeggero, 
+        stato__in=['smarrito', 'ritrovato']
+    )
+
     return render(request, 'gestionale/prenotazioni_cliente.html', {
         'prenotazioni': prenotazioni,
+        'passeggero': passeggero, # Passiamo l'oggetto passeggero per l'anagrafica
+        'bagagli_alert': bagagli_alert, # Passiamo gli alert
+    })
+
+def dashboard_cliente(request):
+    # Recuperiamo i bagagli del cliente loggato
+    bagagli = Bagaglio.objects.filter(username_passeggero=request.user.username)
+    
+    # Filtriamo quelli con problemi o ritrovamenti per gli avvisi
+    avvisi_bagagli = bagagli.filter(stato__in=['smarrito', 'ritrovato'])
+    
+    return render(request, 'gestionale/dashboard_cliente.html', {
+        'bagagli': bagagli,
+        'avvisi': avvisi_bagagli
     })
 
 # VIEW AREA OPERATORE (Gestione)
@@ -270,7 +290,6 @@ def modifica_volo(request, volo_id):
         messages.error(request, 'Area riservata agli operatori voli.')
         return redirect('gestionale:home')
     
-    # MODIFICA QUI: Cerca il volo se l'aeroporto dell'operatore è Partenza OPPURE Destinazione
     volo = get_object_or_404(
         Volo, 
         Q(partenza=operatore.aeroporto) | Q(destinazione=operatore.aeroporto), 
@@ -278,7 +297,6 @@ def modifica_volo(request, volo_id):
     )
 
     if request.method == 'POST':
-        # MODIFICA QUI: Passiamo l'operatore al form come abbiamo previsto nel suo __init__
         form = GestioneVoloForm(request.POST, instance=volo, operatore=operatore)
         
         if form.is_valid():
@@ -297,7 +315,6 @@ def modifica_volo(request, volo_id):
             messages.success(request, f'Volo {volo.codice} aggiornato correttamente.')
             return redirect('gestionale:lista_voli_operatore')
     else:
-        # MODIFICA QUI: Passiamo l'operatore anche nella GET
         form = GestioneVoloForm(instance=volo, operatore=operatore)
 
     return render(request, 'gestionale/modifica_volo.html', {
@@ -309,52 +326,72 @@ def modifica_volo(request, volo_id):
 def registra_bagaglio(request):
     operatore = operatore_corrente(request.user)
 
-    # Controllo permessi
     if not operatore or operatore.ruolo not in ('admin', 'operatore_bagagli'):
         messages.error(request, 'Area riservata agli operatori bagagli.')
         return redirect('gestionale:dashboard_operatore')
 
     prenotazione_trovata = None
+    bagaglio_da_gestire = None
+    
     username_query = request.GET.get('username_ricerca')
+    bagaglio_query = request.GET.get('bagaglio_search')
 
-    # Step 1: Ricerca della prenotazione (Check-in)
     if username_query:
-        # Cerchiamo se esiste una prenotazione per questo username
-        # Usiamo .filter().first() per evitare errori se non esiste
         prenotazione_trovata = Prenotazione.objects.filter(
             username_passeggero=username_query
         ).first()
-        
         if not prenotazione_trovata:
             messages.error(request, f"Nessuna prenotazione attiva per: {username_query}")
 
-    # Step 2: Salvataggio Bagaglio
-    if request.method == 'POST' and 'conferma_bagaglio' in request.POST:
-        # Recuperiamo i dati manualmente dal POST per avere massimo controllo
-        try:
-            nuovo_bagaglio = Bagaglio.objects.create(
-                peso_kg=request.POST.get('peso_kg'),
-                tipo=request.POST.get('tipo'),
-                passeggero_id=request.POST.get('passeggero_id'), # ID dallo hidden field
-                volo_id=request.POST.get('volo_id'),             # ID dallo hidden field
-                codice_operatore=operatore # Assegnato automaticamente dall'operatore loggato
-            )
-            messages.success(request, 'Bagaglio registrato con successo.')
-            return redirect('gestionale:registra_bagaglio')
-        except Exception as e:
-            messages.error(request, f"Errore nel salvataggio: {e}")
+    if bagaglio_query:
+        clean_query = bagaglio_query.replace('#', '')
+        if clean_query.isdigit():
+            bagaglio_da_gestire = Bagaglio.objects.filter(id_bagaglio=clean_query).first()
+        else:
+            bagaglio_da_gestire = Bagaglio.objects.filter(passeggero__username=clean_query).last()
 
-    # Lista degli ultimi bagagli registrati (come nel tuo codice originale)
-    ultimi_bagagli = (
-        Bagaglio.objects
-        .select_related('passeggero', 'volo')
-        .order_by('-id_bagaglio')[:10]
-    )
+        if not bagaglio_da_gestire:
+            messages.error(request, f"Nessun bagaglio trovato per: {bagaglio_query}")
+
+    if request.method == 'POST':
+        if 'conferma_bagaglio' in request.POST:
+            try:
+                Bagaglio.objects.create(
+                    peso_kg=request.POST.get('peso_kg'),
+                    tipo=request.POST.get('tipo'),
+                    passeggero_id=request.POST.get('passeggero_id'),
+                    volo_id=request.POST.get('volo_id'),
+                    operatore=operatore,
+                    stato='imbarcato'
+                )
+                messages.success(request, 'Bagaglio registrato ed imbarcato.')
+                return redirect('gestionale:registra_bagaglio')
+            except Exception as e:
+                messages.error(request, f"Errore nel salvataggio: {e}")
+
+        elif 'aggiorna_stato' in request.POST:
+            try:
+                id_b = request.POST.get('id_bagaglio')
+                nuovo_stato = request.POST.get('nuovo_stato')
+                bagaglio = Bagaglio.objects.get(id_bagaglio=id_b)
+                bagaglio.stato = nuovo_stato
+                bagaglio.save()
+                messages.success(request, f"Stato bagaglio #{id_b} aggiornato correttamente.")
+                return redirect('gestionale:registra_bagaglio')
+            except Exception as e:
+                messages.error(request, f"Errore nell'aggiornamento: {e}")
+
+    # Query per le tabelle
+    ultimi_bagagli = Bagaglio.objects.select_related('passeggero', 'volo').order_by('-id_bagaglio')[:10]
+    bagagli_critici = Bagaglio.objects.filter(stato__in=['smarrito', 'ritrovato']).select_related('passeggero', 'volo').order_by('-id_bagaglio')
 
     return render(request, 'gestionale/registra_bagaglio.html', {
         'prenotazione': prenotazione_trovata,
+        'bagaglio_trovato': bagaglio_da_gestire,
         'bagagli': ultimi_bagagli,
-        'query': username_query
+        'bagagli_critici': bagagli_critici, 
+        'query': username_query,
+        'bagaglio_query': bagaglio_query
     })
 
 @login_required
