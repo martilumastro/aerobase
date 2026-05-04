@@ -31,5 +31,5 @@ urlpatterns = [
     path('operatore/', views.dashboard_operatore, name='dashboard_operatore'),
     # Profilo dopo login
     path('profilo/', views.profilo, name='profilo'),
-
+    path('operatore/staff/', views.gestione_staff, name='gestione_staff'),
 ]

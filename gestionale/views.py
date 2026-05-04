@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+from django.db.models import Count
+from django.contrib.auth.models import User
+from .models import Operatore
 
 from .forms import (
     BagaglioForm,
@@ -220,8 +223,23 @@ def dashboard_operatore(request):
         messages.error(request, 'Area riservata agli operatori.')
         return redirect('gestionale:home')
 
+    mio_aeroporto = operatore.aeroporto
+    
+    # Conteggi rapidi per le "Cards"
+    # Q per i ritardi totali (sia arrivi che partenze)
+    partenze_count = Volo.objects.filter(partenza=mio_aeroporto).count()
+    arrivi_count = Volo.objects.filter(destinazione=mio_aeroporto).count()
+    ritardi_count = Volo.objects.filter(
+        Q(partenza=mio_aeroporto) | Q(destinazione=mio_aeroporto),
+        ritardo_minuti__gt=0
+    ).count()
+
     return render(request, 'gestionale/dashboard_operatore.html', {
         'operatore': operatore,
+        'partenze': partenze_count,
+        'arrivi': arrivi_count,
+        'ritardi': ritardi_count,
+        'aeroporto': mio_aeroporto,
     })
 
 @login_required
@@ -235,9 +253,9 @@ def lista_voli_operatore(request):
 
     voli = (
     Volo.objects
-    .filter(partenza=operatore.aeroporto)
-    .select_related('partenza', 'destinazione', 'codice_gate', 'id_aereo')
-    .order_by('orario_partenza')
+        .filter(partenza=operatore.aeroporto)
+        .select_related('partenza', 'destinazione', 'codice_gate', 'id_aereo')
+        .order_by('orario_partenza')
     )
 
     return render(request, 'gestionale/lista_voli_operatore.html', {
@@ -319,6 +337,53 @@ def registra_bagaglio(request):
     return render(request, 'gestionale/registra_bagaglio.html', {
         'form': form,
         'bagagli': bagagli,
+    })
+
+@login_required
+def gestione_staff(request):
+    operatore_admin = operatore_corrente(request.user)
+    
+    # Operazione solo admin
+    if not operatore_admin or operatore_admin.ruolo != 'admin':
+        messages.error(request, "Accesso negato.")
+        return redirect('gestionale:dashboard_operatore')
+
+    if request.method == 'POST':
+        # Recupero dati dal form
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        nome = request.POST.get('nome')
+        cognome = request.POST.get('cognome')
+        ruolo = request.POST.get('ruolo')
+
+        try:
+            # Creazione utente Django per il login
+            user = User.objects.create_user(username=username, email=email, password=password)
+            
+            # Creazione profilo Operatore legato all'aeroporto dell'admin
+            Operatore.objects.create(
+                id_user=user, 
+                nome=nome,
+                cognome=cognome,
+                email=email,
+                ruolo=ruolo,
+                aeroporto=operatore_admin.aeroporto # Assegnazione automatica
+            )
+            messages.success(request, f"Operatore {nome} registrato con successo!")
+            return redirect('gestionale:gestione_staff')
+        except Exception as e:
+            messages.error(request, f"Errore durante la registrazione: {e}")
+
+    # Lista staff dell'aeroporto (escluso l'admin)
+    # id_user per il filtro exclude
+    staff = Operatore.objects.filter(
+        aeroporto=operatore_admin.aeroporto
+    ).exclude(id_user=request.user)
+    
+    return render(request, 'gestionale/gestione_staff.html', {
+        'staff': staff,
+        'operatore': operatore_admin
     })
 
 # VIEW REAL-TIME (Tabellone Aeroporto)
