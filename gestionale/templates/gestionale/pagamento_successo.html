@@ -1,0 +1,19 @@
+{% extends 'gestionale/base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow p-5">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="text-success">Pagamento Completato!</h2>
+        <p class="lead">Il tuo posto è stato confermato con successo.</p>
+        <div class="alert alert-secondary d-inline-block">
+            Codice Transazione: <strong>{{ txn_id }}</strong>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'gestionale:prenotazioni_cliente' %}" class="btn btn-primary">Vai alle mie prenotazioni</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

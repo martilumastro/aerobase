@@ -31,5 +31,8 @@ urlpatterns = [
     path('operatore/', views.dashboard_operatore, name='dashboard_operatore'),
     # Profilo dopo login
     path('profilo/', views.profilo, name='profilo'),
+    # Per gestire operatori
     path('operatore/staff/', views.gestione_staff, name='gestione_staff'),
+    # Per pagamenti prenotazioni
+    path('checkout/<str:username>/<int:volo_id>/', views.checkout_view, name='checkout'),
 ]

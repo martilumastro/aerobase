@@ -1,0 +1,139 @@
+{% extends 'gestionale/base.html' %}
+
+{% block content %}
+
+<style>
+    .card-checkout {
+        border-radius: 20px !important;
+        overflow: hidden;
+        padding: 24px;
+    }
+
+    .flight-summary-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .summary-line {
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 10px !important;
+        padding: 12px;
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+    }
+
+    .reset-layout-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin: 25px 0 !important;
+    }
+
+    .reset-layout-row input[type="checkbox"] {
+        width: 18px !important;
+        height: 18px !important;
+        cursor: pointer !important;
+    }
+
+    .reset-layout-center {
+        text-align: center !important;
+    }
+
+    .btn-checkout-final {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border: none !important;
+        padding: 14px 0 !important;
+        width: 100% !important;
+        max-width: 350px !important;
+        font-size: 1rem !important;
+        font-weight: bold !important;
+        border-radius: 50px !important;
+        text-transform: uppercase;
+        transition: all 0.3s ease !important;
+    }
+
+    .btn-checkout-final:hover {
+        transform: translateY(-2px) !important;
+        background-color: #0b5ed7 !important;
+    }
+
+    .form-label {
+    display: block;
+    margin-bottom: 8px !important;
+    font-weight: 500;
+    color: #ccc;
+    }
+
+    .mb-custom {
+        margin-bottom: 20px !important;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card shadow card-checkout border-0" style="background-color: var(--surface);">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0">Pagamento Volo {{ volo.1 }}</h4>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- RIEPILOGO COMPATTO -->
+                    <div class="flight-summary-box">
+                        <span class="summary-line"><strong>Dettaglio Viaggio:</strong></span>
+                        <span class="summary-line">Tratta: <strong>da {{ volo.3 }} a {{ volo.4 }}</strong></span>
+                        <span class="summary-line">Posto: <strong>{{ volo.6|default:"Da assegnare" }}</strong> | Classe: <strong>{{ volo.7|default:"Economy" }}</strong></span>
+                        <span class="summary-line">Importo Totale: <strong>{{ volo.2 }} €</strong></span>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-custom">
+                            <label class="form-label small text-muted">Intestatario Carta</label>
+                            <input type="text" name="intestatario" class="form-control" placeholder="Mario Rossi" required>
+                        </div>
+                        
+                        <div class="mb-custom">
+                            <label class="form-label small text-muted">Numero Carta</label>
+                            <input type="text" name="numero_carta" class="form-control" placeholder="1234 5678 1234 5678" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-custom">
+                                <label class="form-label small text-muted">Scadenza (MM/AA)</label>
+                                <input type="text" name="scadenza" class="form-control" placeholder="12/28" required>
+                            </div>
+                            <div class="col-md-6 mb-3 mb-custom">
+                                <label class="form-label small text-muted">CVV</label>
+                                <input type="text" name="cvv" class="form-control" placeholder="123" required>
+                            </div>
+                        </div>
+
+                        <div class="reset-layout-row">
+                            <input type="checkbox" name="salva_carta" id="salva_carta_check">
+                            <label for="salva_carta_check" class="m-0">Salva carta per acquisti futuri</label>
+                        </div>
+
+                        <div class="reset-layout-center">
+                            <button type="submit" class="btn-checkout-final">
+                                CONFERMA PAGAMENTO
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

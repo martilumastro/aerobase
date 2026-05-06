@@ -177,3 +177,37 @@ class Bagaglio(models.Model):
 
     class Meta:
         db_table = 'Bagaglio'
+
+
+class MetodoPagamento(models.Model):
+    id_metodo = models.AutoField(primary_key=True)
+    # Relazione con Passeggero
+    username_passeggero = models.ForeignKey('Passeggero', on_delete=models.CASCADE, db_column='username_passeggero')
+    intestatario = models.CharField(max_length=255)
+    ultime_cifre = models.CharField(max_length=4)
+    mese_scadenza = models.IntegerField()
+    anno_scadenza = models.IntegerField()
+    token_pagamento = models.CharField(max_length=255)
+    data_registrazione = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Metodo_Pagamento'
+
+class Transazione(models.Model):
+    id_transazione = models.AutoField(primary_key=True)
+    username_passeggero = models.CharField(max_length=20) 
+    id_volo = models.IntegerField()
+    importo = models.DecimalField(max_digits=8, decimal_places=2)
+    id_transazione_esterno = models.CharField(max_length=100, unique=True)
+    metodo_usato = models.CharField(max_length=50, null=True, blank=True)
+    stato = models.CharField(max_length=20, choices=[
+        ('in_attesa', 'In Attesa'),
+        ('completato', 'Completato'),
+        ('fallito', 'Fallito')
+    ], default='in_attesa')
+    data_pagamento = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Transazione'

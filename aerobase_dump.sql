@@ -304,7 +304,7 @@ CREATE TABLE `Prenotazione` (
   KEY `fk_pren_volo` (`id_volo`),
   CONSTRAINT `fk_pren_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE,
   CONSTRAINT `fk_pren_volo` FOREIGN KEY (`id_volo`) REFERENCES `Volo` (`id_volo`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -313,7 +313,6 @@ CREATE TABLE `Prenotazione` (
 
 LOCK TABLES `Prenotazione` WRITE;
 /*!40000 ALTER TABLE `Prenotazione` DISABLE KEYS */;
-INSERT INTO `Prenotazione` VALUES (1,'mario1',5,'2026-05-06 06:45:42','3D','economy','non_pagato');
 /*!40000 ALTER TABLE `Prenotazione` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -683,4 +682,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-06 11:14:11
+-- Dump completed on 2026-05-06 11:59:59

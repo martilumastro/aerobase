@@ -1,4 +1,6 @@
 import random
+import uuid
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -10,6 +12,7 @@ from datetime import timedelta
 from django.db.models import Q
 from django.db.models import Count
 from django.contrib.auth.models import User
+from django.db import connection
 
 from .forms import (
     BagaglioForm,
@@ -73,6 +76,68 @@ def profilo(request):
         return redirect('gestionale:dashboard_operatore')
     else:
         return redirect('gestionale:prenotazioni_cliente')
+
+@login_required
+def checkout_view(request, username, volo_id):
+    with connection.cursor() as cursor:
+        # 1. Recuperiamo i dati usando username e volo_id (2 parametri = 2 %s)
+        query = """
+            SELECT p.id_prenotazione, v.numero_volo, v.prezzo, v.partenza, v.destinazione, p.username_passeggero
+            FROM Prenotazione p
+            JOIN Volo v ON p.id_volo = v.id_volo
+            WHERE p.username_passeggero = %s AND p.id_volo = %s
+        """
+        cursor.execute(query, [username, volo_id])
+        dati_checkout = cursor.fetchone()
+
+    # Controllo sicurezza: la prenotazione esiste ed è dell'utente loggato?
+    if not dati_checkout or dati_checkout[5] != request.user.username:
+        messages.error(request, "Accesso non autorizzato o prenotazione non trovata.")
+        return redirect('gestionale:ricerca_voli')
+
+    # ESTRAIAMO l'ID REALE della prenotazione dai risultati della query
+    id_prenotazione = dati_checkout[0]
+
+    if request.method == 'POST':
+        intestatario = request.POST.get('intestatario')
+        numero_carta = request.POST.get('numero_carta')
+        scadenza = request.POST.get('scadenza')
+        salva_carta = request.POST.get('salva_carta')
+
+        # Simulazione dati pagamento
+        id_transazione_fittizio = f"TXN-{uuid.uuid4().hex[:10].upper()}"
+        ultime_4 = numero_carta[-4:] if numero_carta else "0000"
+        
+        try:
+            mese, anno = scadenza.split('/')
+        except ValueError:
+            mese, anno = "01", "30"
+
+        with connection.cursor() as cursor:
+            # Recuperiamo info per le FK della transazione usando l'ID estratto sopra
+            cursor.execute("SELECT username_passeggero, id_volo FROM Prenotazione WHERE id_prenotazione = %s", [id_prenotazione])
+            p_info = cursor.fetchone()
+            
+            # INSERT Transazione
+            cursor.execute("""
+                INSERT INTO Transazione (username_passeggero, id_volo, importo, id_transazione_esterno, metodo_usato, stato)
+                VALUES (%s, %s, %s, %s, %s, 'completato')
+            """, [p_info[0], p_info[1], dati_checkout[2], id_transazione_fittizio, f"Visa **** {ultime_4}"])
+
+            # UPDATE Prenotazione: la segniamo come pagata
+            cursor.execute("UPDATE Prenotazione SET stato_pagamento = 'pagato' WHERE id_prenotazione = %s", [id_prenotazione])
+
+            # INSERT Metodo_Pagamento (se l'utente ha spuntato "salva carta")
+            if salva_carta:
+                cursor.execute("""
+                    INSERT INTO Metodo_Pagamento (username_passeggero, intestatario, ultime_cifre, mese_scadenza, anno_scadenza, token_pagamento)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [p_info[0], intestatario, ultime_4, mese, anno, "TOKEN_TEST"])
+
+        return render(request, 'gestionale/pagamento_successo.html', {'txn_id': id_transazione_fittizio})
+
+    # Passiamo 'dati_checkout' al template così puoi usare {{ volo.1 }}, {{ volo.2 }}, ecc.
+    return render(request, 'gestionale/checkout.html', {'volo': dati_checkout})
 
 # VIEW PUBBLICHE
 def home(request):
@@ -159,9 +224,7 @@ def ricerca_voli(request):
 #VIEW AREA CLIENTE (Richiedono Login)
 @login_required
 def prenota_volo(request, volo_id):
-    # Gestione prenotazione di un posto su un volo specifico.
     passeggero = passeggero_corrente(request.user)
-
     if not passeggero:
         messages.error(request, 'Solo i clienti possono prenotare voli.')
         return redirect('gestionale:ricerca_voli')
@@ -170,7 +233,6 @@ def prenota_volo(request, volo_id):
 
     if request.method == 'POST':
         form = PrenotazioneForm(request.POST)
-
         if form.is_valid():
             prenotazione = form.save(commit=False)
             prenotazione.username_passeggero = passeggero
@@ -179,18 +241,15 @@ def prenota_volo(request, volo_id):
             try:
                 prenotazione.save()
             except IntegrityError:
-                # Gestione eventuale prenotazione doppia di un volo
-                messages.error(request, 'Hai gia una prenotazione per questo volo.')
+                messages.error(request, 'Hai già una prenotazione per questo volo.')
             else:
-                messages.success(request, 'Prenotazione registrata.')
-                return redirect('gestionale:prenotazioni_cliente')
+                messages.success(request, 'Procedi al pagamento per confermare la prenotazione!')
+                # REDIRECT AL CHECKOUT
+                return redirect('gestionale:checkout', username=passeggero.username, volo_id=volo.id_volo)
     else:
         form = PrenotazioneForm()
 
-    return render(request, 'gestionale/prenota_volo.html', {
-        'form': form,
-        'volo': volo,
-    })
+    return render(request, 'gestionale/prenota_volo.html', {'form': form, 'volo': volo})
 
 @login_required
 def prenotazioni_cliente(request):
