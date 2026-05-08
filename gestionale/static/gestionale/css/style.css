@@ -1147,3 +1147,21 @@ tr:last-child td {
     transform: translateY(-1px) scale(0.98);
     box-shadow: 0 5px 15px rgba(46, 230, 166, 0.3);
 }
+
+/* Bagabli */
+.booking-baggage {
+    display: grid;
+    gap: 16px;
+    margin-top: 10px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.booking-baggage h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.booking-baggage p {
+    margin: 0;
+}

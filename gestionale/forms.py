@@ -97,11 +97,104 @@ class RicercaVoliForm(forms.Form):
 
 
 class PrenotazioneForm(forms.ModelForm):
-    #Form creazione/modifica di una prenotazione.
+    bagagli_cabina = forms.IntegerField(
+        min_value=0,
+        max_value=2,
+        initial=0,
+        required=False,
+        label='Bagagli a mano'
+    )
+
+    bagagli_stiva = forms.IntegerField(
+        min_value=0,
+        max_value=3,
+        initial=0,
+        required=False,
+        label='Bagagli in stiva'
+    )
+
+    bagagli_speciali = forms.IntegerField(
+        min_value=0,
+        max_value=1,
+        initial=0,
+        required=False,
+        label='Bagagli speciali'
+    )
+
     class Meta:
         model = Prenotazione
-        fields = ('posto', 'classe')
+        fields = ('classe', 'posto')
 
+    def __init__(self, *args, **kwargs):
+        self.volo = kwargs.pop('volo', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['posto'] = forms.ChoiceField(
+            choices=self.get_posti_liberi(),
+            label='Posto'
+        )
+
+    def get_posti_per_classe(self, classe):
+        configurazione = {
+            'first': {
+                'righe': range(1, 3),
+                'lettere': ['A', 'B', 'C', 'D'],
+            },
+            'business': {
+                'righe': range(3, 9),
+                'lettere': ['A', 'B', 'C', 'D'],
+            },
+            'economy': {
+                'righe': range(9, 31),
+                'lettere': ['A', 'B', 'C', 'D', 'E', 'F'],
+            },
+        }
+
+        posti = []
+        dati = configurazione[classe]
+
+        for riga in dati['righe']:
+            for lettera in dati['lettere']:
+                posti.append(f'{riga}{lettera}')
+
+        return posti
+
+    def get_posti_liberi(self):
+        classe = self.data.get('classe') or self.initial.get('classe') or 'economy'
+
+        if classe not in ['economy', 'business', 'first']:
+            classe = 'economy'
+
+        posti = self.get_posti_per_classe(classe)
+
+        if self.volo:
+            occupati = Prenotazione.objects.filter(
+                id_volo=self.volo,
+                classe=classe
+            ).values_list('posto', flat=True)
+
+            posti = [posto for posto in posti if posto not in occupati]
+
+        return [(posto, posto) for posto in posti]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        classe = cleaned_data.get('classe')
+        posto = cleaned_data.get('posto')
+
+        if classe and posto:
+            posti_validi = self.get_posti_per_classe(classe)
+
+            if posto not in posti_validi:
+                self.add_error('posto', 'Il posto selezionato non appartiene alla classe scelta.')
+
+            if self.volo and Prenotazione.objects.filter(
+                id_volo=self.volo,
+                posto=posto
+            ).exists():
+                self.add_error('posto', 'Questo posto risulta gia occupato.')
+
+        return cleaned_data
 
 class GestioneVoloForm(forms.ModelForm):
     class Meta:

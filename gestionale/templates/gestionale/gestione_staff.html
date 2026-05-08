@@ -21,7 +21,7 @@
                     {% for membro in staff %}
                     <tr>
                         <td>{{ membro.nome }} {{ membro.cognome }}</td>
-                        <td>{{ membro.user.username }}</td>
+                        <td>{{ membro.id_user.username }}</td>
                         <td>{{ membro.get_ruolo_display }}</td>
                         <td>{{ membro.email }}</td>
                     </tr>
@@ -57,6 +57,11 @@
             <div class="staff-form-group">
                 <label>Email</label>
                 <input type="email" name="email" placeholder="mario.rossi@aeroporto.it" required class="form-input">
+            </div>
+
+            <div class="staff-form-group">
+                <label>Cellulare</label>
+                <input type="text" name="cellulare" placeholder="3001234567" required class="form-input">
             </div>
 
             <div class="staff-form-group">

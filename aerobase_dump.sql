@@ -81,17 +81,17 @@ DROP TABLE IF EXISTS `Bagaglio`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Bagaglio` (
   `id_bagaglio` int NOT NULL AUTO_INCREMENT,
-  `peso_kg` decimal(5,2) NOT NULL,
+  `peso_kg` decimal(5,2) DEFAULT NULL,
   `tipo` enum('cabina','stiva','speciale') NOT NULL,
   `username_passeggero` varchar(20) NOT NULL,
   `id_volo` int NOT NULL,
-  `codice_operatore` varchar(20) NOT NULL,
-  `stato` enum('in_attesa','imbarcato','consegnato','smarrito','ritrovato') DEFAULT 'in_attesa',
+  `codice_operatore` varchar(20) DEFAULT NULL,
+  `stato` enum('prenotato','imbarcato','consegnato','smarrito','ritrovato') NOT NULL DEFAULT 'prenotato',
   `data_aggiornamento` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_bagaglio`),
   KEY `fk_bag_prenotazione` (`username_passeggero`,`id_volo`),
   KEY `fk_bag_operatore` (`codice_operatore`),
-  CONSTRAINT `fk_bag_operatore` FOREIGN KEY (`codice_operatore`) REFERENCES `Operatore` (`codice_operatore`) ON DELETE CASCADE,
+  CONSTRAINT `fk_bag_operatore` FOREIGN KEY (`codice_operatore`) REFERENCES `Operatore` (`codice_operatore`) ON DELETE SET NULL,
   CONSTRAINT `fk_bag_prenotazione` FOREIGN KEY (`username_passeggero`, `id_volo`) REFERENCES `Prenotazione` (`username_passeggero`, `id_volo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -682,4 +682,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-06 11:59:59
+-- Dump completed on 2026-05-08 11:58:24

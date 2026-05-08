@@ -28,10 +28,16 @@
                 {% for volo in voli %}
                 <tr>
                     {# Usiamo |default per evitare spazi vuoti che rompono il layout #}
-                    <td><strong class="text-link">{{ volo.codice|default:"N/A" }}</strong></td>
-                    <td>{{ volo.destinazione.nome|default:"-" }}</td>
+                    <td><strong class="text-link">{{ volo.numero_volo|default:"N/A" }}</strong></td>
+                    <td>{{ volo.destinazione.nome_aeroporto|default:"-" }}</td>
                     <td>{{ volo.orario_partenza|date:"H:i" }}</td>
-                    <td>{{ volo.codice_gate.codice|default:"--" }}</td>
+                    <td>
+                        {% if volo.codice_gate %}
+                            {{ volo.codice_gate.codice_gate }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
                     <td>{{ volo.id_aereo.modello|default:"--" }}</td>
                     <td>
                         <span class="status status-{{ volo.stato|lower }}">

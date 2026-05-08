@@ -155,14 +155,15 @@ class Bagaglio(models.Model):
     ]
 
     STATO_CHOICES = [
-        ('imbarcato', 'Imbarcato'),
-        ('consegnato', 'Consegnato'),
-        ('smarrito', 'Smarrito'),
-        ('ritrovato', 'Ritrovato'),
+    ('prenotato', 'Prenotato'),
+    ('imbarcato', 'Imbarcato'),
+    ('consegnato', 'Consegnato'),
+    ('smarrito', 'Smarrito'),
+    ('ritrovato', 'Ritrovato'),
     ]
     
     id_bagaglio = models.AutoField(primary_key=True)
-    peso_kg = models.DecimalField(max_digits=5, decimal_places=2)
+    peso_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     
     stato = models.CharField(
@@ -173,7 +174,14 @@ class Bagaglio(models.Model):
     
     passeggero = models.ForeignKey('Passeggero', on_delete=models.CASCADE, db_column='username_passeggero')
     volo = models.ForeignKey('Volo', on_delete=models.CASCADE, db_column='id_volo')
-    operatore = models.ForeignKey('Operatore', on_delete=models.CASCADE, db_column='codice_operatore')
+    operatore = models.ForeignKey(
+        'Operatore',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='codice_operatore'
+    )
+
 
     class Meta:
         db_table = 'Bagaglio'

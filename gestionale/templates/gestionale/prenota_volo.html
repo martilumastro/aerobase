@@ -68,16 +68,42 @@
             {% endif %}
 
             <div class="field">
-                <label for="{{ form.posto.id_for_label }}">Posto</label>
-                {{ form.posto }}
-                {{ form.posto.errors }}
-            </div>
-
-            <div class="field">
                 <label for="{{ form.classe.id_for_label }}">Classe</label>
                 {{ form.classe }}
                 {{ form.classe.errors }}
             </div>
+
+            <div class="field">
+                <label for="{{ form.posto.id_for_label }}">Posto disponibile</label>
+                {{ form.posto }}
+                {{ form.posto.errors }}
+            </div>
+
+            <div class="booking-baggage">
+                <h3>Bagagli dichiarati</h3>
+                <p class="muted">
+                    Li confermerai al check-in con l'operatore.
+                </p>
+
+                <div class="field">
+                    <label for="{{ form.bagagli_cabina.id_for_label }}">Bagagli a mano</label>
+                    {{ form.bagagli_cabina }}
+                    {{ form.bagagli_cabina.errors }}
+                </div>
+
+                <div class="field">
+                    <label for="{{ form.bagagli_stiva.id_for_label }}">Bagagli in stiva</label>
+                    {{ form.bagagli_stiva }}
+                    {{ form.bagagli_stiva.errors }}
+                </div>
+
+                <div class="field">
+                    <label for="{{ form.bagagli_speciali.id_for_label }}">Bagagli speciali</label>
+                    {{ form.bagagli_speciali }}
+                    {{ form.bagagli_speciali.errors }}
+                </div>
+            </div>
+
 
             <button class="button button-primary full-width" type="submit">
                 Conferma prenotazione

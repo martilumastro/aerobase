@@ -225,6 +225,7 @@ def ricerca_voli(request):
 @login_required
 def prenota_volo(request, volo_id):
     passeggero = passeggero_corrente(request.user)
+
     if not passeggero:
         messages.error(request, 'Solo i clienti possono prenotare voli.')
         return redirect('gestionale:ricerca_voli')
@@ -232,7 +233,8 @@ def prenota_volo(request, volo_id):
     volo = get_object_or_404(Volo, pk=volo_id)
 
     if request.method == 'POST':
-        form = PrenotazioneForm(request.POST)
+        form = PrenotazioneForm(request.POST, volo=volo)
+
         if form.is_valid():
             prenotazione = form.save(commit=False)
             prenotazione.username_passeggero = passeggero
@@ -240,16 +242,49 @@ def prenota_volo(request, volo_id):
 
             try:
                 prenotazione.save()
+
+                bagagli_da_creare = []
+
+                for _ in range(form.cleaned_data.get('bagagli_cabina') or 0):
+                    bagagli_da_creare.append(Bagaglio(
+                        passeggero=passeggero,
+                        volo=volo,
+                        tipo='cabina',
+                        stato='prenotato'
+                    ))
+
+                for _ in range(form.cleaned_data.get('bagagli_stiva') or 0):
+                    bagagli_da_creare.append(Bagaglio(
+                        passeggero=passeggero,
+                        volo=volo,
+                        tipo='stiva',
+                        stato='prenotato'
+                    ))
+
+                for _ in range(form.cleaned_data.get('bagagli_speciali') or 0):
+                    bagagli_da_creare.append(Bagaglio(
+                        passeggero=passeggero,
+                        volo=volo,
+                        tipo='speciale',
+                        stato='prenotato'
+                    ))
+
+                if bagagli_da_creare:
+                    Bagaglio.objects.bulk_create(bagagli_da_creare)
+
             except IntegrityError:
                 messages.error(request, 'Hai già una prenotazione per questo volo.')
             else:
-                messages.success(request, 'Procedi al pagamento per confermare la prenotazione!')
-                # REDIRECT AL CHECKOUT
+                messages.success(request, 'Procedi al pagamento per confermare la prenotazione.')
                 return redirect('gestionale:checkout', username=passeggero.username, volo_id=volo.id_volo)
     else:
-        form = PrenotazioneForm()
+        form = PrenotazioneForm(volo=volo)
 
-    return render(request, 'gestionale/prenota_volo.html', {'form': form, 'volo': volo})
+    return render(request, 'gestionale/prenota_volo.html', {
+        'form': form,
+        'volo': volo
+    })
+
 
 @login_required
 def prenotazioni_cliente(request):
@@ -270,8 +305,8 @@ def prenotazioni_cliente(request):
 
     # Recupero bagagli notifiche
     bagagli_alert = Bagaglio.objects.filter(
-        passeggero=request.user.passeggero, 
-        stato__in=['smarrito', 'ritrovato']
+    passeggero=passeggero,
+    stato__in=['smarrito', 'ritrovato']
     )
 
     return render(request, 'gestionale/prenotazioni_cliente.html', {
@@ -280,13 +315,17 @@ def prenotazioni_cliente(request):
         'bagagli_alert': bagagli_alert, # Passiamo gli alert
     })
 
+@login_required
 def dashboard_cliente(request):
-    # Recuperiamo i bagagli del cliente loggato
-    bagagli = Bagaglio.objects.filter(username_passeggero=request.user.username)
-    
-    # Filtriamo quelli con problemi o ritrovamenti per gli avvisi
+    passeggero = passeggero_corrente(request.user)
+
+    if not passeggero:
+        messages.error(request, 'Area riservata ai clienti.')
+        return redirect('gestionale:home')
+
+    bagagli = Bagaglio.objects.filter(passeggero=passeggero)
     avvisi_bagagli = bagagli.filter(stato__in=['smarrito', 'ritrovato'])
-    
+
     return render(request, 'gestionale/dashboard_cliente.html', {
         'bagagli': bagagli,
         'avvisi': avvisi_bagagli
@@ -367,11 +406,11 @@ def modifica_volo(request, volo_id):
                 id_volo=volo,
                 defaults={
                     'timestamp_modifica': timezone.now(),
-                    'tipo_operazione': 'modifica_operativa', # Nome generico che copre gate/orari
+                    'tipo_operazione': 'modifica_stato',
                 },
             )
 
-            messages.success(request, f'Volo {volo.codice} aggiornato correttamente.')
+            messages.success(request, f'Volo {volo.numero_volo} aggiornato correttamente.')
             return redirect('gestionale:lista_voli_operatore')
     else:
         form = GestioneVoloForm(instance=volo, operatore=operatore)
@@ -470,6 +509,7 @@ def gestione_staff(request):
         nome = request.POST.get('nome')
         cognome = request.POST.get('cognome')
         ruolo = request.POST.get('ruolo')
+        cellulare = request.POST.get('cellulare')
 
         try:
             # Creazione utente Django per il login
@@ -477,10 +517,12 @@ def gestione_staff(request):
             
             # Creazione profilo Operatore legato all'aeroporto dell'admin
             Operatore.objects.create(
-                id_user=user, 
+                codice_operatore=f'OP-{username.upper()}',
+                id_user=user,
                 nome=nome,
                 cognome=cognome,
                 email=email,
+                cellulare=cellulare,
                 ruolo=ruolo,
                 aeroporto=operatore_admin.aeroporto # Assegnazione automatica
             )
