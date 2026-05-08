@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from .models import Bagaglio, Passeggero, Prenotazione, Volo
+from .models import Bagaglio, Passeggero, Prenotazione, Volo, Operatore
 
 
 class RegistrazionePasseggeroForm(UserCreationForm):
@@ -265,3 +265,27 @@ class BagaglioForm(forms.ModelForm):
         model = Bagaglio
         # Cambia i nomi dei campi qui sotto:
         fields = ['peso_kg', 'tipo', 'passeggero', 'volo']
+
+
+class ProfiloPasseggeroForm(forms.ModelForm):
+    class Meta:
+        model = Passeggero
+        fields = (
+            'nome',
+            'cognome',
+            'email',
+            'cellulare',
+            'numero_passaporto',
+            'nazionalita',
+        )
+
+
+class ProfiloOperatoreForm(forms.ModelForm):
+    class Meta:
+        model = Operatore
+        fields = (
+            'nome',
+            'cognome',
+            'email',
+            'cellulare',
+        )

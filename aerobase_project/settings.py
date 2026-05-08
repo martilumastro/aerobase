@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gestionale.context_processors.profili_utente',
             ],
         },
     },
@@ -130,3 +131,6 @@ STATIC_URL = 'static/'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/profilo/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dopo-login/'
+LOGOUT_REDIRECT_URL = '/'
+

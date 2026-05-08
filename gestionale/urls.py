@@ -35,4 +35,10 @@ urlpatterns = [
     path('operatore/staff/', views.gestione_staff, name='gestione_staff'),
     # Per pagamenti prenotazioni
     path('checkout/<str:username>/<int:volo_id>/', views.checkout_view, name='checkout'),
+    # Per pagina propri dati personali passeggero
+    path('cliente/profilo/', views.profilo_cliente, name='profilo_cliente'),
+    # Per pagina propri dati personali operatore
+    path('operatore/profilo/', views.profilo_operatore, name='profilo_operatore'),
+    # Redirect dopo login
+    path('dopo-login/', views.dopo_login, name='dopo_login'),
 ]

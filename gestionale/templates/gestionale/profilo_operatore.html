@@ -1,0 +1,69 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Profilo operatore{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <div class="page-hero-content">
+        <p class="eyebrow">Area operatore</p>
+        <h1>Profilo operatore</h1>
+        <p class="muted">
+            Aggiorna i tuoi dati di contatto. Ruolo e aeroporto sono gestiti dall'amministratore.
+        </p>
+    </div>
+</section>
+
+<section class="section profile-edit-layout">
+    <aside class="profile-side-card">
+        <div class="profile-avatar">
+            {{ operatore.nome|first }}{{ operatore.cognome|first }}
+        </div>
+
+        <h2>{{ operatore.nome }} {{ operatore.cognome }}</h2>
+        <p class="muted">{{ request.user.username }}</p>
+
+        <div class="profile-readonly">
+            <div>
+                <span>Codice operatore</span>
+                <strong>{{ operatore.codice_operatore }}</strong>
+            </div>
+
+            <div>
+                <span>Ruolo</span>
+                <strong>{{ operatore.get_ruolo_display }}</strong>
+            </div>
+
+            <div>
+                <span>Aeroporto</span>
+                <strong>
+                    {% if operatore.aeroporto %}
+                        {{ operatore.aeroporto.codice_iata }}
+                    {% else %}
+                        Non assegnato
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+    </aside>
+
+    <div class="profile-form-card">
+        <h2>Modifica dati personali</h2>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="button button-primary full-span">
+                Salva modifiche
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

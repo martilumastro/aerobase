@@ -20,6 +20,9 @@ from .forms import (
     PrenotazioneForm,
     RegistrazionePasseggeroForm,
     RicercaVoliForm,
+    ProfiloOperatoreForm,
+    ProfiloPasseggeroForm,
+
 )
 from .models import Aeroporto, Bagaglio, Gestione_Volo, Operatore, Passeggero, Prenotazione, Volo
 
@@ -69,13 +72,25 @@ def simula_ritardi_voli():
             volo.ritardo_minuti = random.choice([10, 15, 20, 30, 45])
             volo.save(update_fields=['ritardo_minuti'])
 
+
 @login_required
 def profilo(request):
     operatore = operatore_corrente(request.user)
+
+    if operatore:
+        return redirect('gestionale:profilo_operatore')
+
+    return redirect('gestionale:profilo_cliente')
+
+@login_required
+def dopo_login(request):
+    operatore = operatore_corrente(request.user)
+
     if operatore:
         return redirect('gestionale:dashboard_operatore')
-    else:
-        return redirect('gestionale:prenotazioni_cliente')
+
+    return redirect('gestionale:prenotazioni_cliente')
+
 
 @login_required
 def checkout_view(request, username, volo_id):
@@ -331,6 +346,33 @@ def dashboard_cliente(request):
         'avvisi': avvisi_bagagli
     })
 
+@login_required
+def profilo_cliente(request):
+    passeggero = passeggero_corrente(request.user)
+
+    if not passeggero:
+        messages.error(request, 'Area riservata ai clienti.')
+        return redirect('gestionale:home')
+
+    if request.method == 'POST':
+        form = ProfiloPasseggeroForm(request.POST, instance=passeggero)
+
+        if form.is_valid():
+            profilo = form.save()
+            request.user.email = profilo.email
+            request.user.save(update_fields=['email'])
+
+            messages.success(request, 'Profilo aggiornato correttamente.')
+            return redirect('gestionale:profilo_cliente')
+    else:
+        form = ProfiloPasseggeroForm(instance=passeggero)
+
+    return render(request, 'gestionale/profilo_cliente.html', {
+        'form': form,
+        'passeggero': passeggero,
+    })
+
+
 # VIEW AREA OPERATORE (Gestione)
 @login_required
 def dashboard_operatore(request):
@@ -541,6 +583,33 @@ def gestione_staff(request):
         'staff': staff,
         'operatore': operatore_admin
     })
+
+@login_required
+def profilo_operatore(request):
+    operatore = operatore_corrente(request.user)
+
+    if not operatore:
+        messages.error(request, 'Area riservata agli operatori.')
+        return redirect('gestionale:home')
+
+    if request.method == 'POST':
+        form = ProfiloOperatoreForm(request.POST, instance=operatore)
+
+        if form.is_valid():
+            profilo = form.save()
+            request.user.email = profilo.email
+            request.user.save(update_fields=['email'])
+
+            messages.success(request, 'Profilo operatore aggiornato correttamente.')
+            return redirect('gestionale:profilo_operatore')
+    else:
+        form = ProfiloOperatoreForm(instance=operatore)
+
+    return render(request, 'gestionale/profilo_operatore.html', {
+        'form': form,
+        'operatore': operatore,
+    })
+
 
 # VIEW REAL-TIME (Tabellone Aeroporto)
 def tabellone(request):

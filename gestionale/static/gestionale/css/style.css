@@ -980,36 +980,50 @@ tr:last-child td {
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-between !important;
-    /* Spinge Brand a SX e Links a DX */
     align-items: center !important;
     width: 100% !important;
     max-width: 100% !important;
     padding: 0 5% !important;
-    /* Margine interno laterale */
     height: 80px;
     background: var(--surface);
 }
 
-/* BRAND: Rimane ancorato a sinistra */
+.nav-primary-link {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.nav-user {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 700;
+}
+
+.nav-user:hover {
+    border-color: rgba(46, 230, 166, 0.45);
+    color: var(--primary);
+}
+
+/* BRAND */
 .brand {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    /* Impedisce al logo di rimpicciolirsi */
 }
 
-/* NAV LINKS: Deve andare tutto a destra */
+/* NAV LINKS */
 .nav-links {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     gap: 20px !important;
     margin-left: auto !important;
-    /* Forza la spinta a destra se justify-content fallisce */
     flex-wrap: nowrap !important;
 }
 
-/* Evitiamo che il testo vada a capo */
 .nav-item,
 .user-nickname,
 .logout-btn {
@@ -1039,7 +1053,6 @@ tr:last-child td {
     font-weight: bold;
 }
 
-/* Pulizia link */
 .nav-item {
     font-size: 0.9rem;
     font-weight: 600;
@@ -1164,4 +1177,61 @@ tr:last-child td {
 
 .booking-baggage p {
     margin: 0;
+}
+
+/* Profilo dati personali */
+.profile-edit-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.profile-side-card,
+.profile-form-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.profile-side-card {
+    padding: 26px;
+}
+
+.profile-side-card h2 {
+    margin-top: 18px;
+    font-size: 1.4rem;
+}
+
+.profile-readonly {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.profile-readonly div {
+    display: grid;
+    gap: 4px;
+}
+
+.profile-readonly span {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.profile-form-card {
+    padding: 28px;
+}
+
+.profile-form-card h2 {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+    .profile-edit-layout {
+        grid-template-columns: 1fr;
+    }
 }

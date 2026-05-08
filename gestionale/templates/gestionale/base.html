@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'gestionale/css/style.css' %}">
 </head>
 <body>
-   <header class="site-header">
+    <header class="site-header">
         <nav class="navbar">
             <a href="{% url 'gestionale:home' %}" class="brand">
                 <span class="brand-name">AEROBASE</span>
@@ -24,20 +24,26 @@
                 {% if user.is_authenticated %}
                     <span class="nav-separator">|</span>
 
-                    {# Modifica qui: controlliamo is_staff OPPURE se esiste il profilo operatore #}
-                    {% if user.is_staff or user.operatore %}
-                        <a href="{% url 'gestionale:dashboard_operatore' %}" class="nav-item" style="color: var(--primary); font-weight: bold;">⚙️ Dashboard</a>
-                        <span class="user-nickname">{{ user.username }}</span>
-                    {% else %}
-                        <a href="{% url 'gestionale:prenotazioni_cliente' %}" class="nav-item">Le mie prenotazioni</a>
-                        <span class="user-name">{{ user.username }}</span>
+                    {% if operatore_corrente_template %}
+                        <a href="{% url 'gestionale:dashboard_operatore' %}" class="nav-item nav-primary-link">
+                            Dashboard
+                        </a>
+                    {% elif passeggero_corrente_template %}
+                        <a href="{% url 'gestionale:prenotazioni_cliente' %}" class="nav-item nav-primary-link">
+                            Le mie prenotazioni
+                        </a>
                     {% endif %}
+
+                    <a href="{% url 'gestionale:profilo' %}" class="nav-user">
+                        {{ user.username }}
+                    </a>
 
                     <form class="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="logout-btn">Esci</button>
                     </form>
                 {% else %}
+
                     <a href="{% url 'login' %}" class="nav-item">Login</a>
                     <a href="{% url 'gestionale:registrazione_cliente' %}" class="nav-cta">Registrati</a>
                 {% endif %}

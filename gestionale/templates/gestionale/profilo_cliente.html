@@ -1,0 +1,58 @@
+{% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Profilo cliente{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <div class="page-hero-content">
+        <p class="eyebrow">Area cliente</p>
+        <h1>I miei dati</h1>
+        <p class="muted">
+            Aggiorna le informazioni personali associate al tuo account.
+        </p>
+    </div>
+</section>
+
+<section class="section profile-edit-layout">
+    <aside class="profile-side-card">
+        <div class="profile-avatar">
+            {{ passeggero.nome|first }}{{ passeggero.cognome|first }}
+        </div>
+
+        <h2>{{ passeggero.nome }} {{ passeggero.cognome }}</h2>
+        <p class="muted">{{ request.user.username }}</p>
+
+        <div class="profile-readonly">
+            <div>
+                <span>Username</span>
+                <strong>{{ request.user.username }}</strong>
+            </div>
+
+            <div>
+                <span>Account</span>
+                <strong>Cliente</strong>
+            </div>
+        </div>
+    </aside>
+
+    <div class="profile-form-card">
+        <h2>Modifica profilo</h2>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="button button-primary full-span">
+                Salva modifiche
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
