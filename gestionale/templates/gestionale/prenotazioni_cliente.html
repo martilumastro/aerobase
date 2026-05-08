@@ -4,50 +4,56 @@
 
 {% block content %}
 <section class="page-hero compact-hero">
-    <div class="page-hero-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-        
-        <!-- COLONNA SINISTRA: Anagrafica Cliente -->
+    <div class="page-hero-container customer-hero-panel">
         <div class="user-profile-data">
             <p class="eyebrow">Il tuo profilo</p>
-            <h1 style="margin-bottom: 10px;">{{ user.username }}</h1>
-            <div class="profile-details" style="font-size: 0.9rem; color: var(--muted);">
+            <h1>{{ user.username }}</h1>
+
+            <div class="profile-details">
                 <p><strong>Email:</strong> {{ user.email }}</p>
                 <p><strong>Passaporto:</strong> {{ passeggero.numero_passaporto|default:"Non inserito" }}</p>
                 <p><strong>Nazionalità:</strong> {{ passeggero.nazionalita|default:"-" }}</p>
             </div>
         </div>
 
-        <!-- COLONNA DESTRA: Centro Notifiche -->
-        <div class="notification-center">
+        <div class="notification-center" id="notifiche">
             <div class="notification-badge-container">
-                <a href="#notifiche" class="notification-icon" style="position: relative; display: inline-block; font-size: 1.5rem; text-decoration: none;">
-                    🔔
+                <a href="#notifiche" class="notification-icon">
+                    <span>🔔</span>
+
                     {% if bagagli_speciali %}
-                        <span class="badge" style="position: absolute; top: -5px; right: -5px; background: var(--error); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem;">
+                        <span class="notification-badge">
                             {{ bagagli_speciali.count }}
                         </span>
                     {% endif %}
                 </a>
             </div>
-            
-            <!-- Box Notifiche (puoi decidere di mostrarlo sempre o solo se ci sono messaggi) -->
-            <div class="notification-box" style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: var(--radius); border-left: 4px solid var(--primary);">
-                <p class="eyebrow" style="margin-bottom: 5px;">Messaggi recenti</p>
+
+            <div class="notification-box">
+                <p class="eyebrow">Messaggi recenti</p>
+
                 {% for bagaglio in bagagli_speciali %}
-                    <div class="notif-item" style="font-size: 0.85rem; margin-bottom: 8px;">
+                    <div class="notif-item">
                         {% if bagaglio.stato == 'smarrito' %}
-                            <span style="color: var(--error);">🔴 Bagaglio {{ bagaglio.id_bagaglio }} smarrito</span>
+                            <span class="notif-danger">
+                                Bagaglio {{ bagaglio.id_bagaglio }} smarrito
+                            </span>
                         {% elif bagaglio.stato == 'ritrovato' %}
-                            <span style="color: var(--success);">🟢 Bagaglio {{ bagaglio.id_bagaglio }} ritrovato!</span>
+                            <span class="notif-success">
+                                Bagaglio {{ bagaglio.id_bagaglio }} ritrovato
+                            </span>
                         {% endif %}
                     </div>
                 {% empty %}
-                    <p class="muted" style="font-size: 0.8rem;">Nessuna notifica importante.</p>
+                    <p class="muted notification-empty">
+                        Nessuna notifica importante.
+                    </p>
                 {% endfor %}
             </div>
         </div>
     </div>
 </section>
+
 <section class="section">
     <div class="section-heading">
         <div>

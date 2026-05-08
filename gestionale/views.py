@@ -326,9 +326,10 @@ def prenotazioni_cliente(request):
 
     return render(request, 'gestionale/prenotazioni_cliente.html', {
         'prenotazioni': prenotazioni,
-        'passeggero': passeggero, # Passiamo l'oggetto passeggero per l'anagrafica
-        'bagagli_alert': bagagli_alert, # Passiamo gli alert
+        'passeggero': passeggero,
+        'bagagli_speciali': bagagli_alert,
     })
+
 
 @login_required
 def dashboard_cliente(request):

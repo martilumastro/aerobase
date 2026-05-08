@@ -227,15 +227,15 @@ CREATE TABLE `Operatore` (
   `email` varchar(50) NOT NULL,
   `cellulare` varchar(20) NOT NULL,
   `ruolo` enum('admin','operatore_voli','operatore_bagagli') NOT NULL,
-  `codice_aeroporto` char(3) DEFAULT NULL,
-  `id_user` int DEFAULT NULL,
+  `codice_aeroporto` char(3) NOT NULL,
+  `id_user` int NOT NULL,
   PRIMARY KEY (`codice_operatore`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `cellulare` (`cellulare`),
   UNIQUE KEY `id_user` (`id_user`),
   KEY `fk_operatore_aeroporto` (`codice_aeroporto`),
   CONSTRAINT `fk_operatore_aeroporto` FOREIGN KEY (`codice_aeroporto`) REFERENCES `Aeroporto` (`codice_iata`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_operatore_user` FOREIGN KEY (`id_user`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL
+  CONSTRAINT `fk_operatore_user` FOREIGN KEY (`id_user`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -245,7 +245,7 @@ CREATE TABLE `Operatore` (
 
 LOCK TABLES `Operatore` WRITE;
 /*!40000 ALTER TABLE `Operatore` DISABLE KEYS */;
-INSERT INTO `Operatore` VALUES ('ADM-FCO','Admin','Fiumicino','admin.fco@aerobase.it','3000000001','admin','FCO',2),('BAG-FCO','Operatore','Bagagli','bagagli.fco@aerobase.it','3000000003','operatore_bagagli','FCO',4),('VOL-FCO','Operatore','Voli','voli.fco@aerobase.it','3000000002','operatore_voli','FCO',3);
+INSERT INTO `Operatore` VALUES ('ADM-FCO','Admin','Fiumicino','admin.fco@aerobase.it','3450000001','admin','FCO',2),('BAG-FCO','Operatore','Bagagli','bagagli.fco@aerobase.it','3000000003','operatore_bagagli','FCO',4),('VOL-FCO','Operatore','Voli','voli.fco@aerobase.it','3000000002','operatore_voli','FCO',3);
 /*!40000 ALTER TABLE `Operatore` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -264,13 +264,13 @@ CREATE TABLE `Passeggero` (
   `numero_passaporto` varchar(20) DEFAULT NULL,
   `cellulare` varchar(20) DEFAULT NULL,
   `nazionalita` varchar(50) NOT NULL,
-  `id_user` int DEFAULT NULL,
+  `id_user` int NOT NULL,
   PRIMARY KEY (`username`),
   UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `id_user` (`id_user`),
   UNIQUE KEY `numero_passaporto` (`numero_passaporto`),
   UNIQUE KEY `cellulare` (`cellulare`),
-  UNIQUE KEY `id_user` (`id_user`),
-  CONSTRAINT `fk_passeggero_user` FOREIGN KEY (`id_user`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL
+  CONSTRAINT `fk_passeggero_user` FOREIGN KEY (`id_user`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -387,7 +387,7 @@ CREATE TABLE `Volo` (
 
 LOCK TABLES `Volo` WRITE;
 /*!40000 ALTER TABLE `Volo` DISABLE KEYS */;
-INSERT INTO `Volo` VALUES (1,'AZ1001','2026-05-03 23:26:47','2026-05-04 00:41:47','FCO','MXP',1,NULL,'partito',0,89.90),(2,'AZ1002','2026-05-04 23:26:47','2026-05-05 00:36:47','FCO','LIN',1,NULL,'partito',0,95.50),(3,'RY2201','2026-05-05 23:26:47','2026-05-06 01:06:47','CIA','BCN',2,NULL,'partito',0,64.99),(4,'EZY3301','2026-05-06 23:26:47','2026-05-07 01:11:47','MXP','CDG',3,NULL,'in_orario',0,78.00),(5,'AZ4401','2026-05-07 23:26:47','2026-05-08 01:26:47','FCO','AMS',1,NULL,'in_orario',0,122.00);
+INSERT INTO `Volo` VALUES (1,'AZ1001','2026-05-03 23:26:47','2026-05-04 00:41:47','FCO','MXP',1,NULL,'partito',0,89.90),(2,'AZ1002','2026-05-04 23:26:47','2026-05-05 00:36:47','FCO','LIN',1,NULL,'partito',0,95.50),(3,'RY2201','2026-05-05 23:26:47','2026-05-06 01:06:47','CIA','BCN',2,NULL,'partito',0,64.99),(4,'EZY3301','2026-05-06 23:26:47','2026-05-07 01:11:47','MXP','CDG',3,NULL,'partito',0,78.00),(5,'AZ4401','2026-05-07 23:26:47','2026-05-08 01:26:47','FCO','AMS',1,NULL,'partito',0,122.00);
 /*!40000 ALTER TABLE `Volo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -501,7 +501,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-06 08:44:52.198160',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-06 08:04:18.398303',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=',NULL,0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-08 13:57:23.269240',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-08 13:57:49.046070',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=','2026-05-08 12:29:18.187099',0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -682,4 +682,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-08 11:58:24
+-- Dump completed on 2026-05-08 23:07:30

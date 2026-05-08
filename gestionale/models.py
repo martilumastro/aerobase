@@ -90,14 +90,16 @@ class Operatore(models.Model):
     cellulare = models.CharField(max_length=20, unique=True)
     ruolo = models.CharField(max_length=20, choices=RUOLO_CHOICES)
     aeroporto = models.ForeignKey(
-    Aeroporto,
-    on_delete=models.PROTECT,
-    null=True,
-    blank=True,
-    db_column='codice_aeroporto',
-    related_name='operatori'
+        Aeroporto,
+        on_delete=models.PROTECT,
+        db_column='codice_aeroporto',
+        related_name='operatori'
     )
-    id_user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_user')
+    id_user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        db_column='id_user'
+    )
 
     class Meta:
         db_table = 'Operatore'
@@ -110,23 +112,35 @@ class Passeggero(models.Model):
     numero_passaporto = models.CharField(max_length=20, unique=True, null=True, blank=True)
     cellulare = models.CharField(max_length=20, unique=True, null=True, blank=True)
     nazionalita = models.CharField(max_length=50)
-    id_user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_user')
+    id_user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        db_column='id_user'
+    )
+
 
     class Meta:
         db_table = 'Passeggero'
 
 class Prenotazione(models.Model):
     id_prenotazione = models.AutoField(primary_key=True)
+
     CLASSE_CHOICES = [
         ('economy', 'Economy'),
         ('business', 'Business'),
         ('first', 'First'),
     ]
+
     username_passeggero = models.ForeignKey(Passeggero, on_delete=models.CASCADE, db_column='username_passeggero')
     id_volo = models.ForeignKey(Volo, on_delete=models.CASCADE, db_column='id_volo')
     data_acquisto = models.DateTimeField(auto_now_add=True)
     posto = models.CharField(max_length=5)
     classe = models.CharField(max_length=10, choices=CLASSE_CHOICES)
+
+    class Meta:
+        db_table = 'Prenotazione'
+        unique_together = (('username_passeggero', 'id_volo'),)
+
 
     class Meta:
         db_table = 'Prenotazione'
@@ -169,7 +183,7 @@ class Bagaglio(models.Model):
     stato = models.CharField(
         max_length=20, 
         choices=STATO_CHOICES, 
-        default='imbarcato'
+        default='prenotato'
     )
     
     passeggero = models.ForeignKey('Passeggero', on_delete=models.CASCADE, db_column='username_passeggero')
