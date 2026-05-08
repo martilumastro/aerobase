@@ -473,6 +473,7 @@ def registra_bagaglio(request):
 
     prenotazione_trovata = None
     bagaglio_da_gestire = None
+    bagagli_prenotazione = Bagaglio.objects.none()
     
     username_query = request.GET.get('username_ricerca')
     bagaglio_query = request.GET.get('bagaglio_search')
@@ -483,6 +484,14 @@ def registra_bagaglio(request):
         ).first()
         if not prenotazione_trovata:
             messages.error(request, f"Nessuna prenotazione attiva per: {username_query}")
+        else:
+            bagagli_prenotazione = Bagaglio.objects.filter(
+                passeggero=prenotazione_trovata.username_passeggero,
+                volo=prenotazione_trovata.id_volo,
+            ).order_by('id_bagaglio')
+
+            if not bagagli_prenotazione.exists():
+                messages.warning(request, f"La prenotazione di {username_query} non contiene bagagli da accettare.")
 
     if bagaglio_query:
         clean_query = bagaglio_query.replace('#', '')
@@ -497,16 +506,24 @@ def registra_bagaglio(request):
     if request.method == 'POST':
         if 'conferma_bagaglio' in request.POST:
             try:
-                Bagaglio.objects.create(
-                    peso_kg=request.POST.get('peso_kg'),
-                    tipo=request.POST.get('tipo'),
+                id_bagaglio = request.POST.get('id_bagaglio')
+
+                bagaglio = Bagaglio.objects.get(
+                    id_bagaglio=id_bagaglio,
                     passeggero_id=request.POST.get('passeggero_id'),
                     volo_id=request.POST.get('volo_id'),
-                    operatore=operatore,
-                    stato='imbarcato'
                 )
-                messages.success(request, 'Bagaglio registrato ed imbarcato.')
+
+                bagaglio.peso_kg = request.POST.get('peso_kg')
+                bagaglio.tipo = request.POST.get('tipo')
+                bagaglio.operatore = operatore
+                bagaglio.stato = 'imbarcato'
+                bagaglio.save()
+
+                messages.success(request, f"Bagaglio #{bagaglio.id_bagaglio} aggiornato ed imbarcato.")
                 return redirect('gestionale:registra_bagaglio')
+            except Bagaglio.DoesNotExist:
+                messages.error(request, "Il bagaglio selezionato non appartiene alla prenotazione indicata.")
             except Exception as e:
                 messages.error(request, f"Errore nel salvataggio: {e}")
 
@@ -523,11 +540,12 @@ def registra_bagaglio(request):
                 messages.error(request, f"Errore nell'aggiornamento: {e}")
 
     # Query per le tabelle
-    ultimi_bagagli = Bagaglio.objects.select_related('passeggero', 'volo').order_by('-id_bagaglio')[:10]
+    ultimi_bagagli = Bagaglio.objects.exclude(stato='prenotato').select_related('passeggero', 'volo').order_by('-id_bagaglio')[:10]
     bagagli_critici = Bagaglio.objects.filter(stato__in=['smarrito', 'ritrovato']).select_related('passeggero', 'volo').order_by('-id_bagaglio')
 
     return render(request, 'gestionale/registra_bagaglio.html', {
         'prenotazione': prenotazione_trovata,
+        'bagagli_prenotazione': bagagli_prenotazione,
         'bagaglio_trovato': bagaglio_da_gestire,
         'bagagli': ultimi_bagagli,
         'bagagli_critici': bagagli_critici, 
@@ -668,4 +686,3 @@ def api_tabellone(request):
     return JsonResponse({
         'voli': data,
     })
-

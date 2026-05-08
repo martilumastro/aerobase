@@ -40,14 +40,14 @@
                             </button>
                         </form>
 
-                        {% if prenotazione %}
+                        {% if prenotazione and bagagli_prenotazione %}
                             <form method="post" class="form-divider">
                                 {% csrf_token %}
                                 <input type="hidden" name="passeggero_id" value="{{ prenotazione.username_passeggero_id }}">
                                 <input type="hidden" name="volo_id" value="{{ prenotazione.id_volo_id }}">
 
                                 <h3 class="form-section-title form-section-title-primary">
-                                    Dati nuovo bagaglio
+                                    Dati bagaglio prenotato
                                 </h3>
 
                                 <div class="baggage-context">
@@ -56,21 +56,32 @@
                                 </div>
 
                                 <div class="staff-form-group">
+                                    <label>Bagaglio da accettare</label>
+                                    <select name="id_bagaglio" id="id_bagaglio_accettazione" class="form-input" required>
+                                        {% for bagaglio in bagagli_prenotazione %}
+                                            <option value="{{ bagaglio.id_bagaglio }}" data-tipo="{{ bagaglio.tipo }}" data-peso="{{ bagaglio.peso_kg|default:'' }}">
+                                                #{{ bagaglio.id_bagaglio }} - {{ bagaglio.get_tipo_display }} - {{ bagaglio.get_stato_display }}{% if bagaglio.peso_kg %} - {{ bagaglio.peso_kg }} kg{% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="staff-form-group">
                                     <label>Peso bagaglio (kg)</label>
-                                    <input type="number" step="0.01" name="peso_kg" placeholder="0.00" class="form-input" required>
+                                    <input type="number" step="0.01" name="peso_kg" id="peso_kg_accettazione" placeholder="0.00" class="form-input" required>
                                 </div>
 
                                 <div class="staff-form-group">
                                     <label>Tipologia</label>
-                                    <select name="tipo" class="form-input">
+                                    <select name="tipo" id="tipo_accettazione" class="form-input">
                                         <option value="cabina">In cabina</option>
-                                        <option value="stiva" selected>In stiva</option>
+                                        <option value="stiva">In stiva</option>
                                         <option value="speciale">Bagaglio speciale</option>
                                     </select>
                                 </div>
 
                                 <button type="submit" name="conferma_bagaglio" class="btn-submit-staff">
-                                    Registra ed emetti etichetta
+                                    Aggiorna ed emetti etichetta
                                 </button>
                             </form>
                         {% endif %}
@@ -225,6 +236,20 @@ function openTab(evt, tabName) {
 
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
+    const bagaglioSelect = document.getElementById('id_bagaglio_accettazione');
+    const tipoSelect = document.getElementById('tipo_accettazione');
+    const pesoInput = document.getElementById('peso_kg_accettazione');
+
+    if (bagaglioSelect && tipoSelect && pesoInput) {
+        const syncBagaglioFields = function() {
+            const selectedOption = bagaglioSelect.options[bagaglioSelect.selectedIndex];
+            tipoSelect.value = selectedOption.dataset.tipo || 'stiva';
+            pesoInput.value = selectedOption.dataset.peso || '';
+        };
+
+        bagaglioSelect.addEventListener('change', syncBagaglioFields);
+        syncBagaglioFields();
+    }
 
     if (urlParams.has('bagaglio_search')) {
         document.querySelectorAll('.tab-btn')[1].click();
