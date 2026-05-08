@@ -1,76 +1,86 @@
 {% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Gestione bagagli{% endblock %}
+
 {% block content %}
 <section class="section">
-    <div class="tabs-container" style="display: flex; gap: 10px; margin-bottom: -1px; position: relative; z-index: 2;">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Area bagagli</p>
+            <h1>Gestione bagagli</h1>
+        </div>
+    </div>
+
+    <div class="tabs-container">
         <button class="tab-btn active" onclick="openTab(event, 'accettazione')" id="defaultOpen">
-            Gestione Accettazione
+            Gestione accettazione
         </button>
+
         <button class="tab-btn" onclick="openTab(event, 'riconsegna')">
-            Riconsegna e Smarrimenti
+            Riconsegna e smarrimenti
         </button>
     </div>
 
-    <!-- CARD -->
-    <div class="main-card-container" style="background: var(--surface-soft); border: 1px solid var(--line); border-radius: 0 var(--radius) var(--radius) var(--radius); padding: 30px;">
-        
-        <!-- ACCETTAZIONE -->
+    <div class="main-card-container">
         <div id="accettazione" class="tab-content">
-            <div style="display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: start;">
-                
-                <div class="auth-card staff-form-card" style="border-top: 4px solid var(--primary);">
+            <div class="baggage-layout">
+                <div class="auth-card staff-form-card staff-form-card-primary">
                     <div class="staff-management-form">
-                        <h3 style="margin-bottom: 5px;">Accettazione Bagaglio</h3>
-                        <p class="muted" style="margin-bottom: 20px;">Cerca username per imbarco</p>
-                        
-                        <!-- RICERCA PASSEGGERO -->
-                        <form method="GET">
+                        <h3 class="form-card-heading">Accettazione bagaglio</h3>
+                        <p class="muted form-card-text">Cerca username per imbarco</p>
+
+                        <form method="get">
                             <div class="staff-form-group">
-                                <label>Username Passeggero</label>
+                                <label>Username passeggero</label>
                                 <input type="text" name="username_ricerca" placeholder="Es. mrossi88" class="form-input" value="{{ query|default:'' }}">
                             </div>
+
                             <button type="submit" class="btn-submit-staff">
-                                Cerca Prenotazione
+                                Cerca prenotazione
                             </button>
                         </form>
 
                         {% if prenotazione %}
-                        <form method="POST" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line);">
-                            {% csrf_token %}
-                            <input type="hidden" name="passeggero_id" value="{{ prenotazione.username_passeggero_id }}">
-                            <input type="hidden" name="volo_id" value="{{ prenotazione.id_volo_id }}">
-                            
-                            <h3 style="color: var(--primary); margin-bottom: 15px;">Dati Nuovo Bagaglio</h3>
-                            
-                            <div style="background: var(--surface); padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-                                <p style="margin:0; font-size: 0.9em; color: var(--text);">Passeggero: <strong>{{ prenotazione.username_passeggero }}</strong></p>
-                                <p style="margin:0; font-size: 0.9em; color: var(--text);">Volo: <strong>{{ prenotazione.id_volo }}</strong></p>
-                            </div>
+                            <form method="post" class="form-divider">
+                                {% csrf_token %}
+                                <input type="hidden" name="passeggero_id" value="{{ prenotazione.username_passeggero_id }}">
+                                <input type="hidden" name="volo_id" value="{{ prenotazione.id_volo_id }}">
 
-                            <div class="staff-form-group">
-                                <label>Peso Bagaglio (kg)</label>
-                                <input type="number" step="0.01" name="peso_kg" placeholder="0.00" class="form-input" required>
-                            </div>
+                                <h3 class="form-section-title form-section-title-primary">
+                                    Dati nuovo bagaglio
+                                </h3>
 
-                            <div class="staff-form-group">
-                                <label>Tipologia</label>
-                                <select name="tipo" class="form-input">
-                                    <option value="cabina">In Cabina</option>
-                                    <option value="stiva" selected>In Stiva</option>
-                                    <option value="speciale">Bagaglio Speciale</option>
-                                </select>
-                            </div>
+                                <div class="baggage-context">
+                                    <p>Passeggero: <strong>{{ prenotazione.username_passeggero }}</strong></p>
+                                    <p>Volo: <strong>{{ prenotazione.id_volo }}</strong></p>
+                                </div>
 
-                            <button type="submit" name="conferma_bagaglio" class="btn-submit-staff">
-                                Registra ed Emetti Etichetta
-                            </button>
-                        </form>
+                                <div class="staff-form-group">
+                                    <label>Peso bagaglio (kg)</label>
+                                    <input type="number" step="0.01" name="peso_kg" placeholder="0.00" class="form-input" required>
+                                </div>
+
+                                <div class="staff-form-group">
+                                    <label>Tipologia</label>
+                                    <select name="tipo" class="form-input">
+                                        <option value="cabina">In cabina</option>
+                                        <option value="stiva" selected>In stiva</option>
+                                        <option value="speciale">Bagaglio speciale</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" name="conferma_bagaglio" class="btn-submit-staff">
+                                    Registra ed emetti etichetta
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="table-card">
-                    <h3 style="margin-bottom: 20px;">Ultimi Bagagli Accettati</h3>
-                    <table class="fl-table">
+                <div class="table-card table-card-padded">
+                    <h3 class="table-card-title">Ultimi bagagli accettati</h3>
+
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -81,14 +91,22 @@
                         </thead>
                         <tbody>
                             {% for b in bagagli %}
-                            <tr>
-                                <td>#{{ b.id_bagaglio }}</td>
-                                <td>{{ b.passeggero.username }}</td>
-                                <td>{{ b.peso_kg }}kg</td>
-                                <td><span class="status status-{{ b.stato }}">{{ b.get_stato_display }}</span></td>
-                            </tr>
+                                <tr>
+                                    <td>#{{ b.id_bagaglio }}</td>
+                                    <td>{{ b.passeggero.username }}</td>
+                                    <td>{{ b.peso_kg }} kg</td>
+                                    <td>
+                                        <span class="status status-{{ b.stato }}">
+                                            {{ b.get_stato_display }}
+                                        </span>
+                                    </td>
+                                </tr>
                             {% empty %}
-                            <tr><td colspan="4" style="text-align: center;">Nessun bagaglio registrato oggi.</td></tr>
+                                <tr>
+                                    <td colspan="4" class="empty-row">
+                                        Nessun bagaglio registrato oggi.
+                                    </td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -96,49 +114,56 @@
             </div>
         </div>
 
-        <!-- RICONSEGNA E SMARRIMENTI -->
-        <div id="riconsegna" class="tab-content" style="display:none;">
-            <div style="display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: start;">
-                
-                <div class="auth-card staff-form-card" style="border-top: 4px solid var(--warning);">
+        <div id="riconsegna" class="tab-content tab-content-hidden">
+            <div class="baggage-layout">
+                <div class="auth-card staff-form-card staff-form-card-warning">
                     <div class="staff-management-form">
-                        <h3 style="margin-bottom: 15px;">Gestione Riconsegna</h3>
-                        <form method="GET">
+                        <h3 class="form-card-heading">Gestione riconsegna</h3>
+
+                        <form method="get">
                             <div class="staff-form-group">
-                                <label>ID Bagaglio o Username</label>
+                                <label>ID bagaglio o username</label>
                                 <input type="text" name="bagaglio_search" placeholder="Es. #102" class="form-input">
                             </div>
-                            <button type="submit" class="btn-submit-staff" style="background: var(--warning) !important;">
-                                Cerca Bagaglio
+
+                            <button type="submit" class="btn-submit-staff button-warning">
+                                Cerca bagaglio
                             </button>
                         </form>
 
                         {% if bagaglio_trovato %}
-                        <form method="POST" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line);">
-                            {% csrf_token %}
-                            <input type="hidden" name="id_bagaglio" value="{{ bagaglio_trovato.id_bagaglio }}">
-                            <h3 style="color: var(--warning);">Aggiorna Stato #{{ bagaglio_trovato.id_bagaglio }}</h3>
-                            
-                            <div class="staff-form-group">
-                                <label>Nuovo Stato</label>
-                                <select name="nuovo_stato" class="form-input">
-                                    <option value="imbarcato" {% if bagaglio_trovato.stato == 'imbarcato' %}selected{% endif %}>Imbarcato</option>
-                                    <option value="consegnato" {% if bagaglio_trovato.stato == 'consegnato' %}selected{% endif %}>Consegnato</option>
-                                    <option value="smarrito" {% if bagaglio_trovato.stato == 'smarrito' %}selected{% endif %}>Smarrito</option>
-                                    <option value="ritrovato" {% if bagaglio_trovato.stato == 'ritrovato' %}selected{% endif %}>Ritrovato</option>
-                                </select>
-                            </div>
-                            <button type="submit" name="aggiorna_stato" class="btn-submit-staff" style="background: var(--warning) !important;">
-                                Aggiorna
-                            </button>
-                        </form>
+                            <form method="post" class="form-divider">
+                                {% csrf_token %}
+                                <input type="hidden" name="id_bagaglio" value="{{ bagaglio_trovato.id_bagaglio }}">
+
+                                <h3 class="form-section-title form-section-title-warning">
+                                    Aggiorna stato #{{ bagaglio_trovato.id_bagaglio }}
+                                </h3>
+
+                                <div class="staff-form-group">
+                                    <label>Nuovo stato</label>
+                                    <select name="nuovo_stato" class="form-input">
+                                        <option value="imbarcato" {% if bagaglio_trovato.stato == 'imbarcato' %}selected{% endif %}>Imbarcato</option>
+                                        <option value="consegnato" {% if bagaglio_trovato.stato == 'consegnato' %}selected{% endif %}>Consegnato</option>
+                                        <option value="smarrito" {% if bagaglio_trovato.stato == 'smarrito' %}selected{% endif %}>Smarrito</option>
+                                        <option value="ritrovato" {% if bagaglio_trovato.stato == 'ritrovato' %}selected{% endif %}>Ritrovato</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" name="aggiorna_stato" class="btn-submit-staff button-warning">
+                                    Aggiorna
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="table-card">
-                    <h3 style="color: var(--error); margin-bottom: 20px;">Criticità e Smarrimenti Attivi</h3>
-                    <table class="fl-table">
+                <div class="table-card table-card-padded">
+                    <h3 class="table-card-title table-card-title-danger">
+                        Criticità e smarrimenti attivi
+                    </h3>
+
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -150,13 +175,27 @@
                         </thead>
                         <tbody>
                             {% for b in bagagli_critici %}
-                            <tr>
-                                <td>#{{ b.id_bagaglio }}</td>
-                                <td>{{ b.passeggero.username }}</td>
-                                <td>{{ b.volo.id_volo }}</td>
-                                <td><span class="status status-{{ b.stato }}">{{ b.get_stato_display }}</span></td>
-                                <td><a href="?bagaglio_search={{ b.id_bagaglio }}#riconsegna" class="text-link">Gestisci</a></td>
-                            </tr>
+                                <tr>
+                                    <td>#{{ b.id_bagaglio }}</td>
+                                    <td>{{ b.passeggero.username }}</td>
+                                    <td>{{ b.volo.id_volo }}</td>
+                                    <td>
+                                        <span class="status status-{{ b.stato }}">
+                                            {{ b.get_stato_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="?bagaglio_search={{ b.id_bagaglio }}#riconsegna" class="text-link">
+                                            Gestisci
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="empty-row">
+                                        Nessuna criticità attiva.
+                                    </td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -166,36 +205,27 @@
     </div>
 </section>
 
-<!-- CSS AGGIUNTIVI -->
-<style>
-.tab-btn { background: var(--surface); border: 1px solid var(--line); padding: 12px 25px; cursor: pointer; color: var(--muted); border-radius: var(--radius) var(--radius) 0 0; transition: all 0.3s; font-weight: 600; }
-.tab-btn.active { background: var(--surface-soft); border-bottom: 2px solid var(--primary); color: var(--primary); }
-.form-input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: white; margin-top: 5px; font-family: inherit; }
-.btn-submit-staff { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.btn-submit-staff:hover { opacity: 0.9; }
-.staff-form-group { margin-bottom: 15px; }
-.staff-form-group label { display: block; font-size: 0.85em; font-weight: 600; color: var(--text-soft); margin-bottom: 5px; }
-.muted { color: #888; font-size: 0.9em; }
-</style>
-
 <script>
 function openTab(evt, tabName) {
     var i, tabcontent, tablinks;
+
     tabcontent = document.getElementsByClassName("tab-content");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
+
     tablinks = document.getElementsByClassName("tab-btn");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
+
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 }
 
-// Se cerco un bagaglio, riapri automaticamente la tab riconsegna
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
+
     if (urlParams.has('bagaglio_search')) {
         document.querySelectorAll('.tab-btn')[1].click();
     }

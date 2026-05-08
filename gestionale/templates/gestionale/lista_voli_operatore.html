@@ -3,7 +3,7 @@
 {% block title %}Gestione Voli - {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="section">
+<section class="section">
     <div class="section-heading">
         <div>
             <span class="eyebrow">Operativo Aeroporto</span>
@@ -46,11 +46,11 @@
                     </td>
                     <td>
                         {% if volo.pk %}
-                            <a href="{% url 'gestionale:modifica_volo' volo.pk %}" class="button" style="padding: 6px 12px; font-size: 0.8rem; display: inline-block;">
+                            <a href="{% url 'gestionale:modifica_volo' volo.pk %}" class="button table-button">
                                 Modifica
                             </a>
                         {% else %}
-                            <span style="color: red; font-size: 0.7rem;">ID NON TROVATO</span>
+                            <span class="table-error">ID non trovato</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -62,5 +62,5 @@
             </tbody>
         </table>
     </div>
-</div>
+</section>
 {% endblock %}

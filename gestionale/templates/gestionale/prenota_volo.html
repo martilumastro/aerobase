@@ -19,7 +19,7 @@
             <div>
                 <span class="muted">Da</span>
                 <h2>{{ volo.partenza.citta }}</h2>
-                <p>{{ volo.partenza.nome_aeroporto }} · {{ volo.partenza.codice_iata }}</p>
+                <p>{{ volo.partenza.nome_aeroporto }} &middot; {{ volo.partenza.codice_iata }}</p>
             </div>
 
             <div class="route-line"></div>
@@ -27,7 +27,7 @@
             <div>
                 <span class="muted">A</span>
                 <h2>{{ volo.destinazione.citta }}</h2>
-                <p>{{ volo.destinazione.nome_aeroporto }} · {{ volo.destinazione.codice_iata }}</p>
+                <p>{{ volo.destinazione.nome_aeroporto }} &middot; {{ volo.destinazione.codice_iata }}</p>
             </div>
         </div>
 
@@ -56,7 +56,7 @@
 
     <aside class="booking-form-card">
         <p class="eyebrow">Totale</p>
-        <div class="price">€ {{ volo.prezzo }}</div>
+        <div class="price">&euro; {{ volo.prezzo }}</div>
 
         <form method="post" class="form-stack">
             {% csrf_token %}

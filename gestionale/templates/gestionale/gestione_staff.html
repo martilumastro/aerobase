@@ -1,88 +1,101 @@
 {% extends 'gestionale/base.html' %}
+
+{% block title %}Aerobase | Gestione staff{% endblock %}
+
 {% block content %}
 <section class="section">
-    <h1>Gestione Staff - {{ operatore.aeroporto.nome_aeroporto }}</h1>
-    
-    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin-top: 30px;">
-        
-        <!-- Tabella Staff -->
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Area amministratore</p>
+            <h1>Gestione staff</h1>
+            <p class="muted">{{ operatore.aeroporto.nome_aeroporto }}</p>
+        </div>
+    </div>
+
+    <div class="staff-layout">
         <div>
             <h3>Operatori attivi</h3>
-            <table class="fl-table">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Username</th>
-                        <th>Ruolo</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for membro in staff %}
-                    <tr>
-                        <td>{{ membro.nome }} {{ membro.cognome }}</td>
-                        <td>{{ membro.id_user.username }}</td>
-                        <td>{{ membro.get_ruolo_display }}</td>
-                        <td>{{ membro.email }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="4">Nessun altro operatore registrato.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Username</th>
+                            <th>Ruolo</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for membro in staff %}
+                            <tr>
+                                <td>{{ membro.nome }} {{ membro.cognome }}</td>
+                                <td>{{ membro.id_user.username }}</td>
+                                <td>{{ membro.get_ruolo_display }}</td>
+                                <td>{{ membro.email }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="empty-row">
+                                    Nessun altro operatore registrato.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- Form -->
         <div class="auth-card staff-form-card">
-        <h3 class="form-title">Aggiungi Operatore</h3>
-        
-        <form method="post" class="staff-management-form">
-            {% csrf_token %}
-            
-            <div class="staff-form-group">
-                <label>Nome</label>
-                <input type="text" name="nome" placeholder="Es. Mario" required class="form-input">
-            </div>
+            <h3 class="form-title">Aggiungi operatore</h3>
 
-            <div class="staff-form-group">
-                <label>Cognome</label>
-                <input type="text" name="cognome" placeholder="Es. Rossi" required class="form-input">
-            </div>
+            <form method="post" class="staff-management-form">
+                {% csrf_token %}
 
-            <div class="staff-form-group">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="mrossi_fco" required class="form-input">
-            </div>
+                <div class="staff-form-group">
+                    <label>Nome</label>
+                    <input type="text" name="nome" placeholder="Es. Mario" required class="form-input">
+                </div>
 
-            <div class="staff-form-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="mario.rossi@aeroporto.it" required class="form-input">
-            </div>
+                <div class="staff-form-group">
+                    <label>Cognome</label>
+                    <input type="text" name="cognome" placeholder="Es. Rossi" required class="form-input">
+                </div>
 
-            <div class="staff-form-group">
-                <label>Cellulare</label>
-                <input type="text" name="cellulare" placeholder="3001234567" required class="form-input">
-            </div>
+                <div class="staff-form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="mrossi_fco" required class="form-input">
+                </div>
 
-            <div class="staff-form-group">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="********" required class="form-input">
-            </div>
-            
-            <div class="staff-form-group">
-                <label>Ruolo Operatore</label>
-                <select name="ruolo" class="form-input">
-                    <option value="operatore_voli">Operatore Voli</option>
-                    <option value="operatore_bagagli">Operatore Bagagli</option>
-                    <option value="admin">Amministratore (Admin)</option>
-                </select>
-            </div>
-            
-            <button type="submit" class="btn-submit-staff">
-                Registra Operatore
-            </button>
-        </form>
-    </div>
+                <div class="staff-form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="mario.rossi@aeroporto.it" required class="form-input">
+                </div>
+
+                <div class="staff-form-group">
+                    <label>Cellulare</label>
+                    <input type="text" name="cellulare" placeholder="3001234567" required class="form-input">
+                </div>
+
+                <div class="staff-form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="********" required class="form-input">
+                </div>
+
+                <div class="staff-form-group">
+                    <label>Ruolo operatore</label>
+                    <select name="ruolo" class="form-input">
+                        <option value="operatore_voli">Operatore voli</option>
+                        <option value="operatore_bagagli">Operatore bagagli</option>
+                        <option value="admin">Amministratore</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit-staff">
+                    Registra operatore
+                </button>
+            </form>
+        </div>
     </div>
 </section>
 {% endblock %}
