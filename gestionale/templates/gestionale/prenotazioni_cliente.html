@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="page-hero compact-hero">
-    <div class="page-hero-container customer-hero-panel">
+    <div class="customer-hero-panel">
         <div class="user-profile-data">
             <p class="eyebrow">Il tuo profilo</p>
             <h1>{{ user.username }}</h1>
@@ -12,15 +12,14 @@
             <div class="profile-details">
                 <p><strong>Email:</strong> {{ user.email }}</p>
                 <p><strong>Passaporto:</strong> {{ passeggero.numero_passaporto|default:"Non inserito" }}</p>
-                <p><strong>Nazionalità:</strong> {{ passeggero.nazionalita|default:"-" }}</p>
+                <p><strong>Nazionalit&agrave;:</strong> {{ passeggero.nazionalita|default:"-" }}</p>
             </div>
         </div>
 
-        <div class="notification-center" id="notifiche">
+        <div class="notification-center">
             <div class="notification-badge-container">
                 <a href="#notifiche" class="notification-icon">
-                    <span>🔔</span>
-
+                    !
                     {% if bagagli_speciali %}
                         <span class="notification-badge">
                             {{ bagagli_speciali.count }}
@@ -29,25 +28,19 @@
                 </a>
             </div>
 
-            <div class="notification-box">
+            <div class="notification-box" id="notifiche">
                 <p class="eyebrow">Messaggi recenti</p>
 
                 {% for bagaglio in bagagli_speciali %}
                     <div class="notif-item">
                         {% if bagaglio.stato == 'smarrito' %}
-                            <span class="notif-danger">
-                                Bagaglio {{ bagaglio.id_bagaglio }} smarrito
-                            </span>
+                            <span class="notif-danger">Bagaglio {{ bagaglio.id_bagaglio }} smarrito</span>
                         {% elif bagaglio.stato == 'ritrovato' %}
-                            <span class="notif-success">
-                                Bagaglio {{ bagaglio.id_bagaglio }} ritrovato
-                            </span>
+                            <span class="notif-success">Bagaglio {{ bagaglio.id_bagaglio }} ritrovato</span>
                         {% endif %}
                     </div>
                 {% empty %}
-                    <p class="muted notification-empty">
-                        Nessuna notifica importante.
-                    </p>
+                    <p class="notification-empty">Nessuna notifica importante.</p>
                 {% endfor %}
             </div>
         </div>
