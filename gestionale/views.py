@@ -506,7 +506,8 @@ def registra_bagaglio(request):
 
     if username_query:
         prenotazione_trovata = Prenotazione.objects.filter(
-            username_passeggero=username_query
+            username_passeggero=username_query,
+            id_volo__partenza=operatore.aeroporto,
         ).first()
         if not prenotazione_trovata:
             messages.error(request, f"Nessuna prenotazione attiva per: {username_query}")
@@ -522,10 +523,15 @@ def registra_bagaglio(request):
     if bagaglio_query:
         clean_query = bagaglio_query.replace('#', '')
         if clean_query.isdigit():
-            bagaglio_da_gestire = Bagaglio.objects.filter(id_bagaglio=clean_query).first()
+            bagaglio_da_gestire = Bagaglio.objects.filter(
+                id_bagaglio=clean_query,
+                volo__partenza=operatore.aeroporto,
+            ).first()
         else:
-            bagaglio_da_gestire = Bagaglio.objects.filter(passeggero__username=clean_query).last()
-
+            bagaglio_da_gestire = Bagaglio.objects.filter(
+                passeggero__username=clean_query,
+                volo__partenza=operatore.aeroporto,
+            ).last()
         if not bagaglio_da_gestire:
             messages.error(request, f"Nessun bagaglio trovato per: {bagaglio_query}")
 
@@ -538,8 +544,8 @@ def registra_bagaglio(request):
                     id_bagaglio=id_bagaglio,
                     passeggero_id=request.POST.get('passeggero_id'),
                     volo_id=request.POST.get('volo_id'),
+                    volo__partenza=operatore.aeroporto,
                 )
-
                 bagaglio.peso_kg = request.POST.get('peso_kg')
                 bagaglio.tipo = request.POST.get('tipo')
                 bagaglio.operatore = operatore
@@ -557,7 +563,10 @@ def registra_bagaglio(request):
             try:
                 id_b = request.POST.get('id_bagaglio')
                 nuovo_stato = request.POST.get('nuovo_stato')
-                bagaglio = Bagaglio.objects.get(id_bagaglio=id_b)
+                bagaglio = Bagaglio.objects.get(
+                    id_bagaglio=id_b,
+                    volo__partenza=operatore.aeroporto,
+                )
                 bagaglio.stato = nuovo_stato
                 bagaglio.save()
                 messages.success(request, f"Stato bagaglio #{id_b} aggiornato correttamente.")
@@ -566,8 +575,23 @@ def registra_bagaglio(request):
                 messages.error(request, f"Errore nell'aggiornamento: {e}")
 
     # Query per le tabelle
-    ultimi_bagagli = Bagaglio.objects.exclude(stato='prenotato').select_related('passeggero', 'volo').order_by('-id_bagaglio')[:10]
-    bagagli_critici = Bagaglio.objects.filter(stato__in=['smarrito', 'ritrovato']).select_related('passeggero', 'volo').order_by('-id_bagaglio')
+    ultimi_bagagli = (
+        Bagaglio.objects
+        .filter(volo__partenza=operatore.aeroporto)
+        .exclude(stato='prenotato')
+        .select_related('passeggero', 'volo')
+        .order_by('-id_bagaglio')[:10]
+    )
+
+    bagagli_critici = (
+        Bagaglio.objects
+        .filter(
+            volo__partenza=operatore.aeroporto,
+            stato__in=['smarrito', 'ritrovato'],
+        )
+        .select_related('passeggero', 'volo')
+        .order_by('-id_bagaglio')
+    )
 
     return render(request, 'gestionale/registra_bagaglio.html', {
         'prenotazione': prenotazione_trovata,
