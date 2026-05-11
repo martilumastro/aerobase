@@ -48,20 +48,9 @@ h3 {
     backdrop-filter: blur(18px);
 }
 
-
-.brand-mark {
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    border-radius: var(--radius);
-    background: var(--primary);
-    color: #06110d;
-    font-weight: 800;
-}
-
-
 .logout-form {
+    display: flex;
+    align-items: center;
     margin: 0;
 }
 
@@ -175,38 +164,7 @@ select:focus {
 
 /* AREA CLIENTE */
 /* Aspetti volo cliete */
-.status {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
-.status-in_orario {
-    background: rgba(46, 230, 166, 0.1);
-    color: var(--primary);
-}
-
-.status-in_ritardo {
-    background: rgba(245, 197, 66, 0.1);
-    color: var(--warning);
-}
-
-.status-cancellato {
-    background: rgba(255, 92, 112, 0.1);
-    color: var(--danger);
-}
-
-.status-partito {
-    background: rgba(70, 180, 255, 0.1);
-    color: var(--accent);
-}
-
 /* Hover sulle prenotazioni cliente */
-.flight-card {
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
 
 .flight-card:hover {
     border-color: var(--line);
@@ -236,7 +194,7 @@ select:focus {
 .booking-form-card {
     position: sticky;
     top: 100px;
-    padding: 30px;
+    padding: 26px;
     background: var(--surface-soft);
     border-color: var(--primary);
 }
@@ -296,6 +254,7 @@ select:focus {
     color: var(--primary);
 }
 
+/* Bagagli */
 .booking-baggage {
     display: grid;
     gap: 16px;
@@ -307,21 +266,6 @@ select:focus {
 .booking-baggage h3,
 .booking-baggage p {
     margin: 0;
-}
-
-.flight-search-page {
-    background: var(--surface-soft);
-    border: 1px solid var(--line);
-    padding: 32px;
-    border-radius: var(--radius);
-    display: grid;
-    grid-template-columns: repeat(3, 1fr) auto;
-    gap: 20px;
-    align-items: flex-end;
-    margin-top: -50px;
-    box-shadow: var(--shadow);
-    z-index: 10;
-    position: relative;
 }
 
 .flight-results {
@@ -640,6 +584,8 @@ select:focus {
 .flight-search-page {
     width: min(820px, calc(100% - 32px));
     margin: 34px auto 0;
+    z-index: 10;
+    position: relative;
 }
 
 .flight-search .button {
@@ -880,6 +826,7 @@ tr:last-child td {
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .flight-card-disabled {
@@ -1056,10 +1003,6 @@ tr:last-child td {
 .booking-details div {
     display: grid;
     gap: 6px;
-}
-
-.booking-form-card {
-    padding: 26px;
 }
 
 .price {
@@ -1697,7 +1640,6 @@ tr:last-child td {
 }
 
 .nav-item,
-.user-nickname,
 .logout-btn {
     white-space: nowrap !important;
 }
@@ -1718,11 +1660,6 @@ tr:last-child td {
     /* Effetto "terminale" per staff */
     font-weight: bold;
     border: 1px solid rgba(46, 230, 166, 0.3);
-}
-
-.user-name {
-    color: var(--accent);
-    font-weight: bold;
 }
 
 .nav-item {
@@ -1750,12 +1687,6 @@ tr:last-child td {
     border-color: var(--danger) !important;
     border-radius: var(--radius);
     background: rgba(255, 92, 112, 0.05) !important;
-}
-
-.logout-form {
-    display: flex !important;
-    align-items: center;
-    margin: 0 !important;
 }
 
 /* GESTIONE STAFF*/
@@ -1833,23 +1764,6 @@ tr:last-child td {
     box-shadow: 0 5px 15px rgba(46, 230, 166, 0.3);
 }
 
-/* Bagabli */
-.booking-baggage {
-    display: grid;
-    gap: 16px;
-    margin-top: 10px;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-}
-
-.booking-baggage h3 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.booking-baggage p {
-    margin: 0;
-}
 
 /* Profilo dati personali */
 .profile-edit-layout {
