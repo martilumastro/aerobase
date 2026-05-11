@@ -882,6 +882,22 @@ tr:last-child td {
     background: var(--surface);
 }
 
+.flight-card-disabled {
+    background: rgba(148, 163, 184, 0.08);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: var(--muted);
+}
+
+.flight-card-disabled .flight-code,
+.flight-card-disabled .flight-line::after {
+    color: var(--muted);
+    background: var(--muted);
+}
+
+.flight-card-disabled:hover {
+    transform: none;
+}
+
 .flight-main {
     display: grid;
     grid-template-columns: minmax(220px, 1fr) minmax(260px, 360px);
@@ -956,6 +972,15 @@ tr:last-child td {
 .flight-meta div {
     display: grid;
     gap: 4px;
+}
+
+.button-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(148, 163, 184, 0.18);
+    color: var(--muted);
+    cursor: not-allowed;
 }
 
 .empty-state {

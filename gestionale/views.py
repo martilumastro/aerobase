@@ -26,6 +26,8 @@ from .forms import (
 )
 from .models import Aeroporto, Bagaglio, Gestione_Volo, Operatore, Passeggero, Prenotazione, Volo
 
+ORE_VISIBILITA_VOLI_PARTITI = 8
+
 # FUNZIONI UTILITY
 def passeggero_corrente(user):
     # profilo Passeggero associato all'utente loggato.
@@ -35,15 +37,28 @@ def operatore_corrente(user):
     # profilo Operatore associato all'utente loggato
     return Operatore.objects.filter(id_user=user).first()
 
+def orario_effettivo_partenza(volo):
+    return volo.orario_partenza + timedelta(minutes=volo.ritardo_minuti)
+
+def volo_prenotabile(volo):
+    return volo.stato not in ('partito', 'cancellato')
+
+def volo_visibile(volo):
+    if volo.stato != 'partito':
+        return volo.stato != 'cancellato'
+
+    limite_visibilita = orario_effettivo_partenza(volo) + timedelta(hours=ORE_VISIBILITA_VOLI_PARTITI)
+    return timezone.now() < limite_visibilita
+
 def aggiorna_stati_voli():
     adesso = timezone.now()
 
     voli = Volo.objects.exclude(stato='cancellato')
 
     for volo in voli:
-        orario_effettivo = volo.orario_partenza + timedelta(minutes=volo.ritardo_minuti)
+        orario_effettivo = orario_effettivo_partenza(volo)
 
-        if adesso >= orario_effettivo + timedelta(minutes=10):
+        if adesso >= orario_effettivo:
             nuovo_stato = 'partito'
         elif adesso >= orario_effettivo - timedelta(minutes=30):
             nuovo_stato = 'imbarco'
@@ -187,6 +202,7 @@ def registrazione_cliente(request):
 
 
 def ricerca_voli(request):
+    aggiorna_stati_voli()
     form = RicercaVoliForm(request.GET or None)
 
     voli = (
@@ -230,6 +246,11 @@ def ricerca_voli(request):
         if data_partenza:
             voli = voli.filter(orario_partenza__date=data_partenza)
 
+    voli = [volo for volo in voli if volo_visibile(volo)]
+
+    for volo in voli:
+        volo.prenotabile = volo_prenotabile(volo)
+
     return render(request, 'gestionale/ricerca_voli.html', {
         'form': form,
         'voli': voli,
@@ -245,7 +266,12 @@ def prenota_volo(request, volo_id):
         messages.error(request, 'Solo i clienti possono prenotare voli.')
         return redirect('gestionale:ricerca_voli')
 
+    aggiorna_stati_voli()
     volo = get_object_or_404(Volo, pk=volo_id)
+
+    if not volo_prenotabile(volo):
+        messages.error(request, 'Questo volo non e piu prenotabile.')
+        return redirect('gestionale:ricerca_voli')
 
     if request.method == 'POST':
         form = PrenotazioneForm(request.POST, volo=volo)
@@ -647,8 +673,6 @@ def api_tabellone(request):
     inizio_giorno = adesso.replace(hour=0, minute=0, second=0, microsecond=0)
     fine_giorno = inizio_giorno + timedelta(days=1)
 
-    limite_vecchi = adesso - timedelta(minutes=20)
-
     voli = (
         Volo.objects
         .select_related('partenza', 'destinazione', 'codice_gate')
@@ -659,17 +683,19 @@ def api_tabellone(request):
         .exclude(
             stato='cancellato'
         )
-        .exclude(
-            stato='partito',
-            orario_partenza__lt=limite_vecchi
-        )
-        .order_by('orario_partenza')[:30]
+        .order_by('orario_partenza')
     )
 
     data = []
 
     for volo in voli:
-        orario_stimato = volo.orario_partenza + timedelta(minutes=volo.ritardo_minuti)
+        if not volo_visibile(volo):
+            continue
+
+        if len(data) >= 30:
+            break
+
+        orario_stimato = orario_effettivo_partenza(volo)
 
         data.append({
             'numero_volo': volo.numero_volo,

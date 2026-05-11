@@ -42,7 +42,7 @@
 
     <div class="flight-results">
         {% for volo in voli %}
-            <article class="flight-card">
+            <article class="flight-card {% if not volo.prenotabile %}flight-card-disabled{% endif %}">
                 <div class="flight-main">
                     <div>
                         <span class="flight-code">{{ volo.numero_volo }}</span>
@@ -81,9 +81,15 @@
                         <strong>€ {{ volo.prezzo }}</strong>
                     </div>
 
-                    <a class="button button-primary" href="{% url 'gestionale:prenota_volo' volo.id_volo %}">
-                        Prenota
-                    </a>
+                    {% if volo.prenotabile %}
+                        <a class="button button-primary" href="{% url 'gestionale:prenota_volo' volo.id_volo %}">
+                            Prenota
+                        </a>
+                    {% else %}
+                        <span class="button button-disabled">
+                            {{ volo.get_stato_display }}
+                        </span>
+                    {% endif %}
                 </div>
             </article>
         {% empty %}
