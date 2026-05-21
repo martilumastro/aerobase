@@ -45,10 +45,12 @@
                         </span>
                     </td>
                     <td>
-                        {% if volo.pk %}
+                        {% if volo.modificabile %}
                             <a href="{% url 'gestionale:modifica_volo' volo.pk %}" class="button table-button">
                                 Modifica
                             </a>
+                        {% elif volo.pk %}
+                            <span class="muted">Partito</span>
                         {% else %}
                             <span class="table-error">ID non trovato</span>
                         {% endif %}

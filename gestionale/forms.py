@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from .models import Bagaglio, Passeggero, Prenotazione, Volo, Operatore
+from .models import Bagaglio, Gate, Passeggero, Prenotazione, Volo, Operatore
 
 
 class RegistrazionePasseggeroForm(UserCreationForm):
@@ -224,6 +224,9 @@ class GestioneVoloForm(forms.ModelForm):
         
         if self.operatore and self.operatore.aeroporto:
             mio_aeroporto = self.operatore.aeroporto
+            self.fields['codice_gate'].queryset = Gate.objects.filter(
+                codice_aeroporto=mio_aeroporto
+            ).order_by('terminal', 'codice_gate')
             
             # CASO A: Il volo PARTE dal mio aeroporto
             if volo.partenza == mio_aeroporto:
@@ -240,13 +243,19 @@ class GestioneVoloForm(forms.ModelForm):
                 self.fields['orario_arrivo'].disabled = True
                 self.fields['ritardo_minuti'].disabled = True
                 self.fields['stato'].disabled = True
+                self.fields['codice_gate'].disabled = True
     # METODO CLEAN
     def clean(self):
         cleaned_data = super().clean()
         gate = cleaned_data.get('codice_gate')
+        orario_partenza = cleaned_data.get('orario_partenza') or self.instance.orario_partenza
+        orario_arrivo = cleaned_data.get('orario_arrivo') or self.instance.orario_arrivo
+
+        if orario_partenza and orario_arrivo and orario_arrivo <= orario_partenza:
+            self.add_error('orario_arrivo', "L'orario di arrivo deve essere successivo all'orario di partenza.")
         
         # Prendere l'orario effettivo (partenza o arrivo)
-        orario_riferimento = cleaned_data.get('orario_partenza') or self.instance.orario_partenza
+        orario_riferimento = orario_partenza
         
         if gate and orario_riferimento:
             # Controlla se il gate è occupato a quell'ora

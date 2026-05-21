@@ -43,6 +43,12 @@ def orario_effettivo_partenza(volo):
 def volo_prenotabile(volo):
     return volo.stato not in ('partito', 'cancellato')
 
+def volo_partito_dal_mio_aeroporto(volo, aeroporto):
+    if volo.partenza_id != aeroporto.codice_iata:
+        return False
+
+    return volo.stato == 'partito' or timezone.now() >= orario_effettivo_partenza(volo)
+
 def volo_visibile(volo):
     if volo.stato != 'partito':
         return volo.stato != 'cancellato'
@@ -140,8 +146,17 @@ def checkout_view(request, username, volo_id):
         
         try:
             mese, anno = scadenza.split('/')
+            mese = int(mese)
+            anno = int(anno)
+            if anno < 100:
+                anno += 2000
         except ValueError:
-            mese, anno = "01", "30"
+            messages.error(request, 'Formato scadenza non valido. Usa MM/AA, per esempio 12/28.')
+            return render(request, 'gestionale/checkout.html', {'volo': dati_checkout})
+
+        if mese < 1 or mese > 12 or anno < timezone.now().year:
+            messages.error(request, 'La scadenza della carta non è valida.')
+            return render(request, 'gestionale/checkout.html', {'volo': dati_checkout})
 
         with connection.cursor() as cursor:
             # Recuperiamo info per le FK della transazione usando l'ID estratto sopra
@@ -437,12 +452,17 @@ def lista_voli_operatore(request):
         messages.error(request, 'Area riservata agli operatori voli.')
         return redirect('gestionale:home')
 
+    aggiorna_stati_voli()
+
     voli = (
     Volo.objects
         .filter(partenza=operatore.aeroporto)
         .select_related('partenza', 'destinazione', 'codice_gate', 'id_aereo')
         .order_by('orario_partenza')
     )
+
+    for volo in voli:
+        volo.modificabile = not volo_partito_dal_mio_aeroporto(volo, operatore.aeroporto)
 
     return render(request, 'gestionale/lista_voli_operatore.html', {
         'voli': voli,
@@ -463,20 +483,29 @@ def modifica_volo(request, volo_id):
         pk=volo_id
     )
 
+    if volo_partito_dal_mio_aeroporto(volo, operatore.aeroporto):
+        messages.error(request, 'Questo volo è già partito dal tuo aeroporto e non può più essere modificato.')
+        return redirect('gestionale:lista_voli_operatore')
+
     if request.method == 'POST':
         form = GestioneVoloForm(request.POST, instance=volo, operatore=operatore)
         
         if form.is_valid():
             form.save()
+
+            if 'codice_gate' in form.changed_data:
+                tipo_operazione = 'modifica_gate'
+            elif 'id_aereo' in form.changed_data:
+                tipo_operazione = 'modifica_aereo'
+            else:
+                tipo_operazione = 'modifica_stato'
             
             # Registra l'operazione nel log
-            Gestione_Volo.objects.update_or_create(
+            Gestione_Volo.objects.create(
                 codice_operatore=operatore,
                 id_volo=volo,
-                defaults={
-                    'timestamp_modifica': timezone.now(),
-                    'tipo_operazione': 'modifica_stato',
-                },
+                timestamp_modifica=timezone.now(),
+                tipo_operazione=tipo_operazione,
             )
 
             messages.success(request, f'Volo {volo.numero_volo} aggiornato correttamente.')

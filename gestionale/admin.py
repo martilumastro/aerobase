@@ -50,11 +50,25 @@ class PrenotazioneAdmin(admin.ModelAdmin):
     search_fields = ('username_passeggero__cognome', 'id_volo__numero_volo')
 
 
+# Personalizzazione Gate
+@admin.register(Gate)
+class GateAdmin(admin.ModelAdmin):
+    list_display = ('codice_gate', 'codice_aeroporto', 'terminal')
+    list_filter = ('codice_aeroporto', 'terminal')
+    search_fields = ('codice_gate', 'codice_aeroporto__codice_iata', 'codice_aeroporto__nome_aeroporto')
+
+
+# Personalizzazione log gestione voli
+@admin.register(Gestione_Volo)
+class GestioneVoloAdmin(admin.ModelAdmin):
+    list_display = ('id_gestione', 'codice_operatore', 'id_volo', 'tipo_operazione', 'timestamp_modifica')
+    list_filter = ('tipo_operazione', 'timestamp_modifica')
+    search_fields = ('codice_operatore__codice_operatore', 'id_volo__numero_volo')
+    ordering = ('-timestamp_modifica',)
+
+
 # Registrazione semplice per gli altri modelli
 admin.site.register(Compagnia_Aerea)
 admin.site.register(Aereo)
-admin.site.register(Gate)
 admin.site.register(Operatore)
-admin.site.register(Gestione_Volo)
 admin.site.register(Bagaglio)
-

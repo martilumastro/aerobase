@@ -91,9 +91,10 @@ CREATE TABLE `Bagaglio` (
   PRIMARY KEY (`id_bagaglio`),
   KEY `fk_bag_prenotazione` (`username_passeggero`,`id_volo`),
   KEY `fk_bag_operatore` (`codice_operatore`),
+  KEY `idx_bagaglio_stato` (`stato`),
   CONSTRAINT `fk_bag_operatore` FOREIGN KEY (`codice_operatore`) REFERENCES `Operatore` (`codice_operatore`) ON DELETE SET NULL,
   CONSTRAINT `fk_bag_prenotazione` FOREIGN KEY (`username_passeggero`, `id_volo`) REFERENCES `Prenotazione` (`username_passeggero`, `id_volo`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,6 +103,7 @@ CREATE TABLE `Bagaglio` (
 
 LOCK TABLES `Bagaglio` WRITE;
 /*!40000 ALTER TABLE `Bagaglio` DISABLE KEYS */;
+INSERT INTO `Bagaglio` VALUES (1,2.00,'cabina','mario1',2,'ADM-FCO','imbarcato','2026-05-08 23:27:37'),(2,5.00,'stiva','mario1',2,'ADM-FCO','imbarcato','2026-05-08 23:28:16'),(3,2.00,'stiva','mario1',2,'ADM-FCO','imbarcato','2026-05-08 22:42:09');
 /*!40000 ALTER TABLE `Bagaglio` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -139,8 +141,11 @@ DROP TABLE IF EXISTS `Gate`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Gate` (
   `codice_gate` varchar(10) NOT NULL,
+  `codice_aeroporto` char(3) NOT NULL,
   `terminal` varchar(10) NOT NULL,
-  PRIMARY KEY (`codice_gate`)
+  PRIMARY KEY (`codice_gate`),
+  KEY `idx_gate_aeroporto` (`codice_aeroporto`),
+  CONSTRAINT `fk_gate_aeroporto` FOREIGN KEY (`codice_aeroporto`) REFERENCES `Aeroporto` (`codice_iata`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -150,7 +155,7 @@ CREATE TABLE `Gate` (
 
 LOCK TABLES `Gate` WRITE;
 /*!40000 ALTER TABLE `Gate` DISABLE KEYS */;
-INSERT INTO `Gate` VALUES ('A12','T1'),('B04','T1'),('C18','T2');
+INSERT INTO `Gate` VALUES ('A12','FCO','T1'),('B04','FCO','T1'),('C18','FCO','T2');
 /*!40000 ALTER TABLE `Gate` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -162,12 +167,14 @@ DROP TABLE IF EXISTS `Gestione_Volo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Gestione_Volo` (
+  `id_gestione` int NOT NULL AUTO_INCREMENT,
   `codice_operatore` varchar(20) NOT NULL,
   `id_volo` int NOT NULL,
   `timestamp_modifica` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_operazione` enum('modifica_stato','modifica_gate','modifica_aereo') NOT NULL,
-  PRIMARY KEY (`codice_operatore`,`id_volo`),
+  PRIMARY KEY (`id_gestione`),
   KEY `id_volo` (`id_volo`),
+  KEY `idx_gestione_operatore_volo` (`codice_operatore`,`id_volo`),
   CONSTRAINT `Gestione_Volo_ibfk_1` FOREIGN KEY (`codice_operatore`) REFERENCES `Operatore` (`codice_operatore`) ON DELETE CASCADE,
   CONSTRAINT `Gestione_Volo_ibfk_2` FOREIGN KEY (`id_volo`) REFERENCES `Volo` (`id_volo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -200,7 +207,9 @@ CREATE TABLE `Metodo_Pagamento` (
   `data_registrazione` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_metodo`),
   KEY `fk_pagamento_passeggero` (`username_passeggero`),
-  CONSTRAINT `fk_pagamento_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_pagamento_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chk_anno_scadenza` CHECK ((`anno_scadenza` >= 2026)),
+  CONSTRAINT `chk_mese_scadenza` CHECK ((`mese_scadenza` between 1 and 12))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -302,9 +311,10 @@ CREATE TABLE `Prenotazione` (
   PRIMARY KEY (`username_passeggero`,`id_volo`),
   UNIQUE KEY `id_prenotazione` (`id_prenotazione`),
   KEY `fk_pren_volo` (`id_volo`),
+  KEY `idx_prenotazione_data_acquisto` (`data_acquisto`),
   CONSTRAINT `fk_pren_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE,
   CONSTRAINT `fk_pren_volo` FOREIGN KEY (`id_volo`) REFERENCES `Volo` (`id_volo`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -313,6 +323,7 @@ CREATE TABLE `Prenotazione` (
 
 LOCK TABLES `Prenotazione` WRITE;
 /*!40000 ALTER TABLE `Prenotazione` DISABLE KEYS */;
+INSERT INTO `Prenotazione` VALUES (1,'mario1',2,'2026-05-08 20:34:42','9A','economy','pagato');
 /*!40000 ALTER TABLE `Prenotazione` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -336,7 +347,7 @@ CREATE TABLE `Transazione` (
   UNIQUE KEY `id_transazione_esterno` (`id_transazione_esterno`),
   KEY `fk_transazione_prenotazione` (`username_passeggero`,`id_volo`),
   CONSTRAINT `fk_transazione_prenotazione` FOREIGN KEY (`username_passeggero`, `id_volo`) REFERENCES `Prenotazione` (`username_passeggero`, `id_volo`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -345,6 +356,7 @@ CREATE TABLE `Transazione` (
 
 LOCK TABLES `Transazione` WRITE;
 /*!40000 ALTER TABLE `Transazione` DISABLE KEYS */;
+INSERT INTO `Transazione` VALUES (1,'mario1',2,95.50,'TXN-7E49045125','Visa **** 1234','completato','2026-05-08 22:36:44');
 /*!40000 ALTER TABLE `Transazione` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -373,11 +385,15 @@ CREATE TABLE `Volo` (
   KEY `fk_volo_gate` (`codice_gate`),
   KEY `fk_volo_destinazione` (`destinazione`),
   KEY `fk_volo_partenza` (`partenza`),
+  KEY `idx_volo_orario_partenza` (`orario_partenza`),
+  KEY `idx_volo_stato` (`stato`),
   CONSTRAINT `fk_volo_aereo` FOREIGN KEY (`id_aereo`) REFERENCES `Aereo` (`id_aereo`) ON DELETE CASCADE,
-  CONSTRAINT `fk_volo_destinazione` FOREIGN KEY (`destinazione`) REFERENCES `Aeroporto` (`codice_iata`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_volo_destinazione` FOREIGN KEY (`destinazione`) REFERENCES `Aeroporto` (`codice_iata`),
   CONSTRAINT `fk_volo_gate` FOREIGN KEY (`codice_gate`) REFERENCES `Gate` (`codice_gate`) ON DELETE SET NULL,
-  CONSTRAINT `fk_volo_partenza` FOREIGN KEY (`partenza`) REFERENCES `Aeroporto` (`codice_iata`) ON UPDATE CASCADE,
-  CONSTRAINT `chk_ritardo_minuti` CHECK ((`ritardo_minuti` >= 0))
+  CONSTRAINT `fk_volo_partenza` FOREIGN KEY (`partenza`) REFERENCES `Aeroporto` (`codice_iata`),
+  CONSTRAINT `chk_orari_volo` CHECK ((`orario_arrivo` > `orario_partenza`)),
+  CONSTRAINT `chk_ritardo_minuti` CHECK ((`ritardo_minuti` >= 0)),
+  CONSTRAINT `chk_rotta` CHECK ((`partenza` <> `destinazione`))
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -501,7 +517,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-08 13:57:23.269240',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-08 13:57:49.046070',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=','2026-05-08 12:29:18.187099',0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-11 07:28:12.790044',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-11 07:28:25.546987',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=','2026-05-08 12:29:18.187099',0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -669,7 +685,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('a9okzj75mfmhdi988e658e4eqqrcss2i','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wKXsC:7rURxdO_gN8drY5HI7bk85MsVHsrVfaqNaJl0jOKJYY','2026-05-20 08:44:52.218423');
+INSERT INTO `django_session` VALUES ('a9okzj75mfmhdi988e658e4eqqrcss2i','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wKXsC:7rURxdO_gN8drY5HI7bk85MsVHsrVfaqNaJl0jOKJYY','2026-05-20 08:44:52.218423'),('ggok1icwieersdlbhcjtnec7f5z9bit5','.eJxVjEEOwiAQRe_C2pCZ0gJ16d4zkBmGStVAUtqV8e7apAvd_vfef6lA25rD1tISZlFn1anT78YUH6nsQO5UblXHWtZlZr0r-qBNX6uk5-Vw_w4ytfytmY1MxjtPkQxYBCRJg8MRRiDbweSABwNgBX0UMNYKI7DBHl1vxan3B9PlNuk:1wML3x:W78o1M-bK5n1OZXQi8KrVfMPohU7CSCGqxq2FUCIZfU','2026-05-25 07:28:25.562865'),('pkx1kv81ecxyagz614ul6my13e3sgo9b','.eJxVjMsOwiAQRf-FtSE8Bhlcuu83kAGmUjU0Ke3K-O_apAvd3nPOfYlI21rj1nmJUxEXocXpd0uUH9x2UO7UbrPMc1uXKcldkQftcpgLP6-H-3dQqddvjbY4ZEc5BA_FKqu1sjbYfC7AHpGTSjAGUAYCcvbICtA7BQZMojGL9we9Tzby:1wML3k:5SV3vpnE_-zDxQsWb7lYGLVCx8FOBXC7It-8Y-2Qijg','2026-05-25 07:28:12.037588');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -682,4 +698,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-08 23:07:30
+-- Dump completed on 2026-05-21 19:19:52

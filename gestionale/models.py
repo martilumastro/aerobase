@@ -20,6 +20,12 @@ class Aereo(models.Model):
 
 class Gate(models.Model):
     codice_gate = models.CharField(max_length=10, primary_key=True)
+    codice_aeroporto = models.ForeignKey(
+        'Aeroporto',
+        on_delete=models.PROTECT,
+        db_column='codice_aeroporto',
+        related_name='gate'
+    )
     terminal = models.CharField(max_length=10)
 
     class Meta:
@@ -131,16 +137,22 @@ class Prenotazione(models.Model):
         ('first', 'First'),
     ]
 
+    STATO_PAGAMENTO_CHOICES = [
+        ('non_pagato', 'Non pagato'),
+        ('pagato', 'Pagato'),
+        ('rimborsato', 'Rimborsato'),
+    ]
+
     username_passeggero = models.ForeignKey(Passeggero, on_delete=models.CASCADE, db_column='username_passeggero')
     id_volo = models.ForeignKey(Volo, on_delete=models.CASCADE, db_column='id_volo')
     data_acquisto = models.DateTimeField(auto_now_add=True)
     posto = models.CharField(max_length=5)
     classe = models.CharField(max_length=10, choices=CLASSE_CHOICES)
-
-    class Meta:
-        db_table = 'Prenotazione'
-        unique_together = (('username_passeggero', 'id_volo'),)
-
+    stato_pagamento = models.CharField(
+        max_length=20,
+        choices=STATO_PAGAMENTO_CHOICES,
+        default='non_pagato'
+    )
 
     class Meta:
         db_table = 'Prenotazione'
@@ -152,6 +164,7 @@ class Gestione_Volo(models.Model):
         ('modifica_gate', 'Modifica Gate'),
         ('modifica_aereo', 'Modifica Aereo'),
     ]
+    id_gestione = models.AutoField(primary_key=True)
     codice_operatore = models.ForeignKey(Operatore, on_delete=models.CASCADE, db_column='codice_operatore')
     id_volo = models.ForeignKey(Volo, on_delete=models.CASCADE, db_column='id_volo')
     timestamp_modifica = models.DateTimeField(auto_now_add=True)
@@ -159,7 +172,6 @@ class Gestione_Volo(models.Model):
 
     class Meta:
         db_table = 'Gestione_Volo'
-        unique_together = (('codice_operatore', 'id_volo'),)
 
 class Bagaglio(models.Model):
     TIPO_CHOICES = [
