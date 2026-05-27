@@ -35,6 +35,11 @@ function renderFlights(flights) {
         return `
             <div class="flight-board-grid flight-board-flight ${mutedClass}">
                 <span class="flight-board-code">${flight.numero_volo}</span>
+                <span>
+                    <b class="flight-type-badge flight-type-${flight.tipo_volo}">
+                        ${flight.tipo_volo_label}
+                    </b>
+                </span>
                 <span>${flight.partenza}</span>
                 <span>${flight.destinazione}</span>
                 <span>${flight.orario_partenza}</span>

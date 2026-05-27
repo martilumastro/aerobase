@@ -19,6 +19,14 @@ class Aereo(models.Model):
         db_table = 'Aereo'
 
 class Gate(models.Model):
+    AREA_IMBARCO_CHOICES = [
+        ('Area A', 'Area A'),
+        ('Area B', 'Area B'),
+        ('Area C', 'Area C'),
+        ('Area D', 'Area D'),
+        ('Area E', 'Area E'),
+    ]
+
     codice_gate = models.CharField(max_length=10, primary_key=True)
     codice_aeroporto = models.ForeignKey(
         'Aeroporto',
@@ -27,6 +35,12 @@ class Gate(models.Model):
         related_name='gate'
     )
     terminal = models.CharField(max_length=10)
+    internazionale = models.BooleanField(default=False)
+    area_imbarco = models.CharField(
+        max_length=20,
+        choices=AREA_IMBARCO_CHOICES,
+        default='Area A'
+    )
 
     class Meta:
         db_table = 'Gate'
@@ -53,11 +67,15 @@ class Volo(models.Model):
         ('cancellato', 'Cancellato'),
     ]
 
+    TIPO_VOLO_CHOICES = [
+        ('nazionale', 'Nazionale'),
+        ('internazionale', 'Internazionale'),
+    ]
+
     id_volo = models.AutoField(primary_key=True)
     numero_volo = models.CharField(max_length=10, unique=True)
     orario_partenza = models.DateTimeField()
     orario_arrivo = models.DateTimeField()
-    
 
     partenza = models.ForeignKey(
         Aeroporto,
@@ -78,10 +96,42 @@ class Volo(models.Model):
     stato = models.CharField(max_length=20, choices=STATO_CHOICES, default='in_orario')
     prezzo = models.DecimalField(max_digits=8, decimal_places=2)
     ritardo_minuti = models.IntegerField(default=0)
+    tipo_volo = models.CharField(max_length=20, choices=TIPO_VOLO_CHOICES, default='nazionale')
 
     class Meta:
         db_table = 'Volo'
 
+class Volo_Nazionale(models.Model):
+    id_volo = models.OneToOneField(
+        Volo,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column='id_volo',
+        related_name='dettagli_nazionali'
+    )
+    agevolazioni_statali = models.BooleanField(default=False)
+    tipo_agevolazione = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        db_table = 'Volo_Nazionale'
+
+
+class Volo_Internazionale(models.Model):
+    id_volo = models.OneToOneField(
+        Volo,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column='id_volo',
+        related_name='dettagli_internazionali'
+    )
+    richiede_passaporto = models.BooleanField(default=True)
+    tipo_visto = models.CharField(max_length=50, null=True, blank=True)
+    validita_minima_passaporto_mesi = models.PositiveSmallIntegerField(default=6)
+    fuso_orario_destinazione = models.CharField(max_length=50, null=True, blank=True)
+    certificazioni_sanitarie_richieste = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'Volo_Internazionale'
 
 class Operatore(models.Model):
     RUOLO_CHOICES = [
@@ -115,6 +165,8 @@ class Passeggero(models.Model):
     nome = models.CharField(max_length=50)
     cognome = models.CharField(max_length=50)
     email = models.EmailField(max_length=50, unique=True)
+    codice_carta_identita = models.CharField(max_length=30)
+    codice_fiscale = models.CharField(max_length=16, unique=True, null=True, blank=True)
     numero_passaporto = models.CharField(max_length=20, unique=True, null=True, blank=True)
     cellulare = models.CharField(max_length=20, unique=True, null=True, blank=True)
     nazionalita = models.CharField(max_length=50)

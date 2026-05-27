@@ -43,6 +43,15 @@ def orario_effettivo_partenza(volo):
 def volo_prenotabile(volo):
     return volo.stato not in ('partito', 'cancellato')
 
+def documento_mancante_per_volo(passeggero, volo):
+    if volo.tipo_volo == 'internazionale' and not passeggero.numero_passaporto:
+        return 'passaporto'
+
+    if volo.tipo_volo == 'nazionale' and not passeggero.codice_fiscale:
+        return 'codice_fiscale'
+
+    return None
+
 def volo_partito_dal_mio_aeroporto(volo, aeroporto):
     if volo.partenza_id != aeroporto.codice_iata:
         return False
@@ -287,7 +296,22 @@ def prenota_volo(request, volo_id):
     if not volo_prenotabile(volo):
         messages.error(request, 'Questo volo non e piu prenotabile.')
         return redirect('gestionale:ricerca_voli')
+    documento_mancante = documento_mancante_per_volo(passeggero, volo)
 
+    if documento_mancante == 'passaporto':
+        messages.error(
+            request,
+            'Per prenotare un volo internazionale devi inserire il numero di passaporto nel tuo profilo.'
+        )
+        return redirect('gestionale:profilo_cliente')
+
+    if documento_mancante == 'codice_fiscale':
+        messages.error(
+            request,
+            'Per prenotare un volo nazionale devi inserire il codice fiscale nel tuo profilo.'
+        )
+        return redirect('gestionale:profilo_cliente')
+        
     if request.method == 'POST':
         form = PrenotazioneForm(request.POST, volo=volo)
 
@@ -355,7 +379,12 @@ def prenotazioni_cliente(request):
     prenotazioni = (
         Prenotazione.objects
         .filter(username_passeggero=passeggero)
-        .select_related('id_volo', 'id_volo__codice_gate')
+        .select_related(
+            'id_volo',
+            'id_volo__codice_gate',
+            'id_volo__dettagli_nazionali',
+            'id_volo__dettagli_internazionali',
+        )
         .order_by('-data_acquisto')
     )
 
@@ -752,6 +781,8 @@ def api_tabellone(request):
 
         data.append({
             'numero_volo': volo.numero_volo,
+            'tipo_volo': volo.tipo_volo,
+            'tipo_volo_label': volo.get_tipo_volo_display(),
             'partenza': f'{volo.partenza.citta} - {volo.partenza.codice_iata}',
             'destinazione': f'{volo.destinazione.citta} - {volo.destinazione.codice_iata}',
             'orario_partenza': timezone.localtime(volo.orario_partenza).strftime('%H:%M'),

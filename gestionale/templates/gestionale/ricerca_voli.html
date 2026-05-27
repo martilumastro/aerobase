@@ -45,7 +45,13 @@
             <article class="flight-card {% if not volo.prenotabile %}flight-card-disabled{% endif %}">
                 <div class="flight-main">
                     <div>
-                        <span class="flight-code">{{ volo.numero_volo }}</span>
+                        <div class="flight-title-row">
+                            <span class="flight-code">{{ volo.numero_volo }}</span>
+                            <span class="flight-type-badge flight-type-{{ volo.tipo_volo }}">
+                                {{ volo.get_tipo_volo_display }}
+                            </span>
+                        </div>
+
                         <h3>
                             {{ volo.partenza.citta }}
                             <span>→</span>

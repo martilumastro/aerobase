@@ -16,9 +16,10 @@
             <thead>
                 <tr>
                     <th>Codice</th>
+                    <th>Tipo</th>
                     <th>Destinazione</th>
                     <th>Orario</th>
-                    <th>Gate</th>
+                     <th>Gate</th>
                     <th>Aereo</th>
                     <th>Stato</th>
                     <th>Azioni</th>
@@ -29,6 +30,11 @@
                 <tr>
                     {# Usiamo |default per evitare spazi vuoti che rompono il layout #}
                     <td><strong class="text-link">{{ volo.numero_volo|default:"N/A" }}</strong></td>
+                    <td>
+                        <span class="flight-type-badge flight-type-{{ volo.tipo_volo }}">
+                            {{ volo.get_tipo_volo_display }}
+                        </span>
+                    </td>
                     <td>{{ volo.destinazione.nome_aeroporto|default:"-" }}</td>
                     <td>{{ volo.orario_partenza|date:"H:i" }}</td>
                     <td>
@@ -58,7 +64,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="empty-row">Nessun volo assegnato al tuo aeroporto.</td>
+                   <td colspan="8" class="empty-row">Nessun volo assegnato al tuo aeroporto.</td>
                 </tr>
                 {% endfor %}
             </tbody>

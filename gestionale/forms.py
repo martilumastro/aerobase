@@ -13,6 +13,8 @@ class RegistrazionePasseggeroForm(UserCreationForm):
     nome = forms.CharField(max_length=50)
     cognome = forms.CharField(max_length=50)
     email = forms.EmailField(max_length=50)
+    codice_carta_identita = forms.CharField(max_length=30, label="Codice carta d'identita")
+    codice_fiscale = forms.CharField(max_length=16, required=False, label='Codice fiscale')
     numero_passaporto = forms.CharField(max_length=20, required=False)
     cellulare = forms.CharField(max_length=20, required=False)
     nazionalita = forms.CharField(max_length=50)
@@ -45,6 +47,17 @@ class RegistrazionePasseggeroForm(UserCreationForm):
 
         return email
 
+    def clean_codice_fiscale(self):
+        codice_fiscale = self.cleaned_data.get('codice_fiscale')
+
+        if codice_fiscale:
+            codice_fiscale = codice_fiscale.upper()
+
+            if Passeggero.objects.filter(codice_fiscale=codice_fiscale).exists():
+                raise forms.ValidationError('Esiste gia un passeggero con questo codice fiscale.')
+
+        return codice_fiscale
+
     @transaction.atomic
     def save(self, commit=True):
         # Sovrascrittura metodo save per creare contemporaneamente oggetto User e Passeggero in modo atomico.
@@ -61,6 +74,8 @@ class RegistrazionePasseggeroForm(UserCreationForm):
                 nome=self.cleaned_data['nome'],
                 cognome=self.cleaned_data['cognome'],
                 email=self.cleaned_data['email'],
+                codice_carta_identita=self.cleaned_data['codice_carta_identita'],
+                codice_fiscale=self.cleaned_data.get('codice_fiscale') or None,
                 numero_passaporto=self.cleaned_data.get('numero_passaporto') or None,
                 cellulare=self.cleaned_data.get('cellulare') or None,
                 nazionalita=self.cleaned_data['nazionalita'],
@@ -224,9 +239,16 @@ class GestioneVoloForm(forms.ModelForm):
         
         if self.operatore and self.operatore.aeroporto:
             mio_aeroporto = self.operatore.aeroporto
+            gate_internazionale = volo.tipo_volo == 'internazionale'
+
             self.fields['codice_gate'].queryset = Gate.objects.filter(
-                codice_aeroporto=mio_aeroporto
-            ).order_by('terminal', 'codice_gate')
+                codice_aeroporto=mio_aeroporto,
+                internazionale=gate_internazionale,
+            ).order_by('terminal', 'area_imbarco', 'codice_gate')
+
+            self.fields['codice_gate'].help_text = (
+                'Sono mostrati solo i gate compatibili con il tipo di volo.'
+            )
             
             # CASO A: Il volo PARTE dal mio aeroporto
             if volo.partenza == mio_aeroporto:
@@ -283,10 +305,21 @@ class ProfiloPasseggeroForm(forms.ModelForm):
             'nome',
             'cognome',
             'email',
+            'codice_carta_identita',
+            'codice_fiscale',
             'cellulare',
             'numero_passaporto',
             'nazionalita',
         )
+        labels = {
+            'codice_carta_identita': "Codice carta d'identita",
+            'codice_fiscale': 'Codice fiscale',
+            'numero_passaporto': 'Numero passaporto',
+        }
+
+    def clean_codice_fiscale(self):
+        codice_fiscale = self.cleaned_data.get('codice_fiscale')
+        return codice_fiscale.upper() if codice_fiscale else None
 
 
 class ProfiloOperatoreForm(forms.ModelForm):

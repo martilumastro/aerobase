@@ -117,6 +117,11 @@ label {
     font-size: 0.86rem;
 }
 
+.required-marker {
+    color: var(--danger);
+    font-weight: 700;
+}
+
 input,
 select {
     width: 100%;
@@ -1051,8 +1056,8 @@ tr:last-child td {
 
 .flight-board-grid {
     display: grid;
-    grid-template-columns: 0.75fr 1.35fr 1.35fr 0.75fr 0.9fr 0.6fr 1fr;
-    gap: 24px;
+    grid-template-columns: 0.7fr 0.9fr 1.25fr 1.25fr 0.7fr 0.85fr 0.55fr 1fr;
+    gap: 20px;
     align-items: center;
 }
 
@@ -1818,6 +1823,80 @@ tr:last-child td {
 
 @media (max-width: 900px) {
     .profile-edit-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.flight-type-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 24px;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.flight-type-nazionale {
+    background: rgba(46, 230, 166, 0.14);
+    color: var(--primary);
+    border: 1px solid rgba(46, 230, 166, 0.35);
+}
+
+.flight-type-internazionale {
+    background: rgba(70, 180, 255, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(70, 180, 255, 0.38);
+}
+
+.flight-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+
+.flight-extra-details {
+    margin-top: 24px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+}
+
+.flight-extra-details summary {
+    cursor: pointer;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.flight-extra-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.flight-extra-grid div,
+.flight-extra-note {
+    display: grid;
+    gap: 6px;
+}
+
+.flight-extra-note {
+    margin-top: 18px;
+}
+
+.flight-extra-note p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+    .flight-extra-grid {
         grid-template-columns: 1fr;
     }
 }

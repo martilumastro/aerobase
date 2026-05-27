@@ -61,9 +61,15 @@
             <article class="flight-card">
                 <div class="flight-main">
                     <div>
-                        <span class="flight-code">
-                            {{ prenotazione.id_volo.numero_volo }}
-                        </span>
+                        <div class="flight-title-row">
+                            <span class="flight-code">
+                                {{ prenotazione.id_volo.numero_volo }}
+                            </span>
+
+                            <span class="flight-type-badge flight-type-{{ prenotazione.id_volo.tipo_volo }}">
+                                {{ prenotazione.id_volo.get_tipo_volo_display }}
+                            </span>
+                        </div>
 
                         <h3>
                             {{ prenotazione.id_volo.partenza.citta }}
@@ -109,6 +115,73 @@
                         <strong>{{ prenotazione.data_acquisto|date:"d/m/Y" }}</strong>
                     </div>
                 </div>
+
+                <details class="flight-extra-details">
+                    <summary>Dettagli {{ prenotazione.id_volo.get_tipo_volo_display|lower }}</summary>
+
+                    {% if prenotazione.id_volo.tipo_volo == 'internazionale' %}
+                        {% if prenotazione.id_volo.dettagli_internazionali %}
+                            <div class="flight-extra-grid">
+                                <div>
+                                    <span class="muted">Passaporto</span>
+                                    <strong>
+                                        {% if prenotazione.id_volo.dettagli_internazionali.richiede_passaporto %}
+                                            Richiesto
+                                        {% else %}
+                                            Non richiesto
+                                        {% endif %}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span class="muted">Visto</span>
+                                    <strong>{{ prenotazione.id_volo.dettagli_internazionali.tipo_visto|default:"Non indicato" }}</strong>
+                                </div>
+
+                                <div>
+                                    <span class="muted">Validità passaporto</span>
+                                    <strong>{{ prenotazione.id_volo.dettagli_internazionali.validita_minima_passaporto_mesi }} mesi</strong>
+                                </div>
+
+                                <div>
+                                    <span class="muted">Fuso orario</span>
+                                    <strong>{{ prenotazione.id_volo.dettagli_internazionali.fuso_orario_destinazione|default:"Non indicato" }}</strong>
+                                </div>
+                            </div>
+
+                            {% if prenotazione.id_volo.dettagli_internazionali.certificazioni_sanitarie_richieste %}
+                                <div class="flight-extra-note">
+                                    <span class="muted">Certificazioni sanitarie richieste</span>
+                                    <p>{{ prenotazione.id_volo.dettagli_internazionali.certificazioni_sanitarie_richieste }}</p>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="muted">Nessun dettaglio internazionale registrato per questo volo.</p>
+                        {% endif %}
+                    {% else %}
+                        {% if prenotazione.id_volo.dettagli_nazionali %}
+                            <div class="flight-extra-grid">
+                                <div>
+                                    <span class="muted">Agevolazioni statali</span>
+                                    <strong>
+                                        {% if prenotazione.id_volo.dettagli_nazionali.agevolazioni_statali %}
+                                            Disponibili
+                                        {% else %}
+                                            Non disponibili
+                                        {% endif %}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span class="muted">Tipo agevolazione</span>
+                                    <strong>{{ prenotazione.id_volo.dettagli_nazionali.tipo_agevolazione|default:"Non indicata" }}</strong>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="muted">Nessun dettaglio nazionale registrato per questo volo.</p>
+                        {% endif %}
+                    {% endif %}
+                </details>
             </article>
         {% empty %}
             <div class="empty-state">
