@@ -215,6 +215,7 @@ Credenziali demo per test:
 
 ## Struttura generale del progetto
 
+```text
 aerobase/
 ├── aerobase_project/
 ├── gestionale/
@@ -227,6 +228,7 @@ aerobase/
 ├── aerobase_dump.sql
 ├── manage.py
 └── README.md
+```
 
 ## Note
 - Il pagamento presente nel progetto è simulato e non utilizza gateway reali.
