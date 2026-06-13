@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="aJKcENRBC4svyx9zB0Gs" name="Page-1">
-        <mxGraphModel dx="1384" dy="1663" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1251" dy="1663" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -1386,7 +1386,7 @@
                         <mxPoint x="180" y="535" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="483" value="Gerarchia Parziale e Disgiunta" style="shape=rhombus;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
+                <mxCell id="483" value="Gerarchia Totale e Disgiunta" style="shape=rhombus;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
                     <mxGeometry x="-40" y="585" width="150" height="75" as="geometry"/>
                 </mxCell>
                 <mxCell id="486" value="" style="endArrow=none;html=1;rounded=0;" parent="1" source="434" target="485" edge="1">
