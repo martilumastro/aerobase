@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: aerobase
 -- ------------------------------------------------------
--- Server version	8.0.46-0ubuntu0.24.04.2
+-- Server version	8.0.46-0ubuntu0.24.04.3
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -94,7 +94,7 @@ CREATE TABLE `Bagaglio` (
   KEY `idx_bagaglio_stato` (`stato`),
   CONSTRAINT `fk_bag_operatore` FOREIGN KEY (`codice_operatore`) REFERENCES `Operatore` (`codice_operatore`) ON DELETE SET NULL,
   CONSTRAINT `fk_bag_prenotazione` FOREIGN KEY (`username_passeggero`, `id_volo`) REFERENCES `Prenotazione` (`username_passeggero`, `id_volo`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,7 +103,7 @@ CREATE TABLE `Bagaglio` (
 
 LOCK TABLES `Bagaglio` WRITE;
 /*!40000 ALTER TABLE `Bagaglio` DISABLE KEYS */;
-INSERT INTO `Bagaglio` VALUES (70,8.50,'cabina','giulia1',100,'BAG-FCO','prenotato','2026-06-13 14:59:58'),(71,21.30,'stiva','luca1',101,'BAG-FCO','imbarcato','2026-06-13 14:59:58');
+INSERT INTO `Bagaglio` VALUES (70,8.50,'cabina','giulia1',100,'BAG-FCO','prenotato','2026-06-13 14:59:58'),(71,21.30,'stiva','luca1',101,'BAG-FCO','imbarcato','2026-06-13 14:59:58'),(72,NULL,'cabina','cliente_demo',101,NULL,'prenotato','2026-06-13 17:44:32'),(73,NULL,'stiva','cliente_demo',101,NULL,'prenotato','2026-06-13 17:44:32');
 /*!40000 ALTER TABLE `Bagaglio` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -321,7 +321,7 @@ CREATE TABLE `Prenotazione` (
   KEY `idx_prenotazione_data_acquisto` (`data_acquisto`),
   CONSTRAINT `fk_pren_passeggero` FOREIGN KEY (`username_passeggero`) REFERENCES `Passeggero` (`username`) ON DELETE CASCADE,
   CONSTRAINT `fk_pren_volo` FOREIGN KEY (`id_volo`) REFERENCES `Volo` (`id_volo`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -330,7 +330,7 @@ CREATE TABLE `Prenotazione` (
 
 LOCK TABLES `Prenotazione` WRITE;
 /*!40000 ALTER TABLE `Prenotazione` DISABLE KEYS */;
-INSERT INTO `Prenotazione` VALUES (50,'giulia1',100,'2026-06-13 14:59:33','12A','economy','pagato'),(51,'luca1',101,'2026-06-13 14:59:33','4C','business','non_pagato');
+INSERT INTO `Prenotazione` VALUES (52,'cliente_demo',101,'2026-06-13 15:44:32','7C','business','pagato'),(50,'giulia1',100,'2026-06-13 14:59:33','12A','economy','pagato'),(51,'luca1',101,'2026-06-13 14:59:33','4C','business','non_pagato');
 /*!40000 ALTER TABLE `Prenotazione` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -354,7 +354,7 @@ CREATE TABLE `Transazione` (
   UNIQUE KEY `id_transazione_esterno` (`id_transazione_esterno`),
   KEY `fk_transazione_prenotazione` (`username_passeggero`,`id_volo`),
   CONSTRAINT `fk_transazione_prenotazione` FOREIGN KEY (`username_passeggero`, `id_volo`) REFERENCES `Prenotazione` (`username_passeggero`, `id_volo`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -363,6 +363,7 @@ CREATE TABLE `Transazione` (
 
 LOCK TABLES `Transazione` WRITE;
 /*!40000 ALTER TABLE `Transazione` DISABLE KEYS */;
+INSERT INTO `Transazione` VALUES (2,'cliente_demo',101,159.50,'TXN-8E11EE89D9','Visa **** 5432','completato','2026-06-13 17:45:24');
 /*!40000 ALTER TABLE `Transazione` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -401,7 +402,7 @@ CREATE TABLE `Volo` (
   CONSTRAINT `chk_orari_volo` CHECK ((`orario_arrivo` > `orario_partenza`)),
   CONSTRAINT `chk_ritardo_minuti` CHECK ((`ritardo_minuti` >= 0)),
   CONSTRAINT `chk_rotta` CHECK ((`partenza` <> `destinazione`))
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,7 +411,7 @@ CREATE TABLE `Volo` (
 
 LOCK TABLES `Volo` WRITE;
 /*!40000 ALTER TABLE `Volo` DISABLE KEYS */;
-INSERT INTO `Volo` VALUES (100,'DLH100','2026-07-01 09:00:00','2026-07-01 10:45:00','FCO','ZRH',10,'FCO-E22','in_orario',0,129.90,'internazionale'),(101,'AFR220','2026-07-02 14:30:00','2026-07-02 17:05:00','FCO','LIS',11,'FCO-E22','in_ritardo',25,159.50,'internazionale'),(102,'AZA501','2026-07-03 08:15:00','2026-07-03 09:25:00','FCO','LIN',1,'FCO-A10','in_orario',0,89.00,'nazionale');
+INSERT INTO `Volo` VALUES (100,'DLH100','2026-07-01 09:00:00','2026-07-01 10:45:00','FCO','ZRH',10,'FCO-E22','in_orario',0,129.90,'internazionale'),(101,'AFR220','2026-07-02 14:30:00','2026-07-02 17:05:00','FCO','LIS',11,'FCO-E22','in_ritardo',25,159.50,'internazionale'),(102,'AZA501','2026-07-03 08:15:00','2026-07-03 09:25:00','FCO','LIN',1,'FCO-A10','in_orario',0,89.00,'nazionale'),(103,'AZA110','2026-06-25 00:45:00','2026-06-25 01:55:00','FCO','LIN',1,'FCO-A10','in_orario',0,79.90,'nazionale'),(104,'RYR221','2026-06-25 01:20:00','2026-06-25 02:35:00','FCO','BGY',2,'FCO-A10','in_orario',0,49.90,'nazionale'),(105,'EZY340','2026-06-25 02:10:00','2026-06-25 04:15:00','FCO','LGW',3,'FCO-E22','in_orario',0,99.90,'internazionale'),(106,'DLH455','2026-06-25 03:15:00','2026-06-25 05:00:00','FCO','BER',10,'FCO-E22','in_ritardo',20,129.90,'internazionale'),(107,'AFR610','2026-06-25 04:00:00','2026-06-25 06:15:00','FCO','CDG',11,'FCO-E22','in_orario',0,139.90,'internazionale'),(108,'AZA720','2026-06-25 05:25:00','2026-06-25 06:35:00','FCO','BLQ',1,'FCO-A10','in_orario',0,69.90,'nazionale'),(109,'RYR815','2026-06-25 06:10:00','2026-06-25 07:25:00','FCO','CTA',2,'FCO-A10','in_orario',0,54.90,'nazionale'),(110,'DLH900','2026-06-25 07:00:00','2026-06-25 08:45:00','FCO','ZRH',10,'FCO-E22','in_orario',0,149.90,'internazionale'),(111,'AFR945','2026-06-25 08:05:00','2026-06-25 10:20:00','FCO','ORY',11,'FCO-E22','in_ritardo',35,159.90,'internazionale'),(112,'AZA990','2026-06-25 09:15:00','2026-06-25 10:25:00','FCO','NAP',1,'FCO-A10','in_orario',0,59.90,'nazionale'),(113,'AZA401','2026-06-24 18:15:00','2026-06-24 19:25:00','FCO','LIN',1,'FCO-A10','in_orario',0,89.00,'nazionale'),(114,'RYR512','2026-06-24 18:50:00','2026-06-24 20:10:00','FCO','BGY',2,'FCO-A10','imbarco',0,54.90,'nazionale'),(115,'AFR620','2026-06-24 19:20:00','2026-06-24 21:35:00','FCO','CDG',11,'FCO-E22','in_orario',0,149.90,'internazionale'),(116,'DLH710','2026-06-24 20:05:00','2026-06-24 21:50:00','FCO','ZRH',10,'FCO-E22','in_ritardo',15,139.90,'internazionale'),(117,'EZY845','2026-06-24 21:10:00','2026-06-24 23:25:00','FCO','LGW',3,'FCO-E22','in_orario',0,109.90,'internazionale'),(118,'AZA930','2026-06-24 22:05:00','2026-06-24 23:15:00','FCO','NAP',1,'FCO-A10','in_orario',0,69.90,'nazionale'),(119,'RYR999','2026-06-24 23:10:00','2026-06-25 00:25:00','FCO','CTA',2,'FCO-A10','in_ritardo',40,59.90,'nazionale');
 /*!40000 ALTER TABLE `Volo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -439,7 +440,7 @@ CREATE TABLE `Volo_Internazionale` (
 
 LOCK TABLES `Volo_Internazionale` WRITE;
 /*!40000 ALTER TABLE `Volo_Internazionale` DISABLE KEYS */;
-INSERT INTO `Volo_Internazionale` VALUES (100,1,NULL,6,'Europe/Zurich',NULL),(101,1,NULL,6,'Europe/Lisbon',NULL);
+INSERT INTO `Volo_Internazionale` VALUES (100,1,NULL,6,'Europe/Zurich',NULL),(101,1,NULL,6,'Europe/Lisbon',NULL),(105,1,NULL,6,'Europe/London',NULL),(106,1,NULL,6,'Europe/Berlin',NULL),(107,1,NULL,6,'Europe/Paris',NULL),(110,1,NULL,6,'Europe/Zurich',NULL),(111,1,NULL,6,'Europe/Paris',NULL),(115,1,NULL,6,'Europe/Paris',NULL),(116,1,NULL,6,'Europe/Zurich',NULL),(117,1,NULL,6,'Europe/London',NULL);
 /*!40000 ALTER TABLE `Volo_Internazionale` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -497,7 +498,7 @@ CREATE TABLE `Volo_Nazionale` (
 
 LOCK TABLES `Volo_Nazionale` WRITE;
 /*!40000 ALTER TABLE `Volo_Nazionale` DISABLE KEYS */;
-INSERT INTO `Volo_Nazionale` VALUES (102,1,'Residenti e studenti');
+INSERT INTO `Volo_Nazionale` VALUES (102,1,'Residenti e studenti'),(103,1,'Residenti e studenti'),(104,1,'Residenti e studenti'),(108,1,'Residenti e studenti'),(109,1,'Residenti e studenti'),(112,1,'Residenti e studenti'),(113,1,'Residenti e studenti'),(114,1,'Residenti e studenti'),(118,1,'Residenti e studenti'),(119,1,'Residenti e studenti');
 /*!40000 ALTER TABLE `Volo_Nazionale` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -643,7 +644,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-11 07:28:12.790044',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-11 07:28:25.546987',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=','2026-05-08 12:29:18.187099',0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013'),(20,'!',NULL,0,'giulia1','','','giulia.bianchi@mail.com',0,1,'2026-06-13 16:59:05.000000'),(21,'!',NULL,0,'luca1','','','luca.verdi@mail.com',0,1,'2026-06-13 16:59:05.000000'),(22,'!',NULL,0,'op_zrh','','','operatore.zrh@aerobase.it',1,1,'2026-06-13 16:59:05.000000'),(24,'pbkdf2_sha256$1200000$wLzD3q6cLFbGObLui0BiVd$xliWPLByKCMyQ3Ay2b/UNFugHd69s/hanNHjuj1gZJw=','2026-06-13 17:35:38.496785',0,'cliente_demo','','','cliente.demo@mail.com',0,1,'2026-06-13 17:29:30.770308'),(25,'pbkdf2_sha256$1200000$0dfmRgc7mD6LTvMovOxkyW$sB6ca3pwHNpi2VIuKMZdYJ2dMn69b71I4YjdN5sjueY=',NULL,0,'admin_demo','','','admin.demo@aerobase.it',0,1,'2026-06-13 17:38:01.341822'),(26,'pbkdf2_sha256$1200000$n1LPdOMAWUflEkUW2cWdxa$nzYgvK/ihYRuzoZJmZnSKmHho/HN4cN+H+sUcIbp+dM=',NULL,0,'voli_demo','','','voli.demo@aerobase.it',0,1,'2026-06-13 17:38:01.954793'),(27,'pbkdf2_sha256$1200000$kWd9P3QdkSG9JGHHznkk2W$UmZpqGwWc0igX9RraBFj/HdnBACNtBPC5Y143WW1HfM=',NULL,0,'bagagli_demo','','','bagagli.demo@aerobase.it',0,1,'2026-06-13 17:38:02.524327');
+INSERT INTO `auth_user` VALUES (1,'pbkdf2_sha256$1200000$QAGdVuteIwyKIzewT9bvzJ$njaZzWrbp6I1pmzMn/Y2OwApFInGmC7X6WGiuLvfa1I=','2026-05-11 07:28:12.790044',0,'mario1','','','mariorossi@mail.com',0,1,'2026-05-01 20:50:00.204224'),(2,'pbkdf2_sha256$1200000$dUSWgta7VPdCfs12F0x1kK$Jd2zrErvAVshpd1os8ht3PJb9sVO8psTeESvKo1zRyw=','2026-05-11 07:28:25.546987',0,'admin_fco','','','admin.fco@aerobase.it',0,1,'2026-05-02 12:55:36.102156'),(3,'pbkdf2_sha256$1200000$Od97OXVozVF33uZjTZx55Y$T3Vrdr0REWnGr8r9RmtMhvxznAIY3ZyYJJ3HLi7h72s=',NULL,0,'voli_fco','','','voli.fco@aerobase.it',0,1,'2026-05-02 12:55:44.430646'),(4,'pbkdf2_sha256$1200000$HP1HRCpRQ1o1qo0jHPU5Ex$7JG/Qm3V/PO6UuTvzQRs8yAATZp0xQXODYQADLweffA=','2026-05-08 12:29:18.187099',0,'bagagli_fco','','','bagagli.fco@aerobase.it',0,1,'2026-05-02 12:55:54.313013'),(20,'!',NULL,0,'giulia1','','','giulia.bianchi@mail.com',0,1,'2026-06-13 16:59:05.000000'),(21,'!',NULL,0,'luca1','','','luca.verdi@mail.com',0,1,'2026-06-13 16:59:05.000000'),(22,'!',NULL,0,'op_zrh','','','operatore.zrh@aerobase.it',1,1,'2026-06-13 16:59:05.000000'),(24,'pbkdf2_sha256$1200000$wLzD3q6cLFbGObLui0BiVd$xliWPLByKCMyQ3Ay2b/UNFugHd69s/hanNHjuj1gZJw=','2026-06-15 22:43:21.094851',0,'cliente_demo','','','cliente.demo@mail.com',0,1,'2026-06-13 17:29:30.770308'),(25,'pbkdf2_sha256$1200000$0dfmRgc7mD6LTvMovOxkyW$sB6ca3pwHNpi2VIuKMZdYJ2dMn69b71I4YjdN5sjueY=','2026-06-13 17:39:03.382293',0,'admin_demo','','','admin.demo@aerobase.it',0,1,'2026-06-13 17:38:01.341822'),(26,'pbkdf2_sha256$1200000$n1LPdOMAWUflEkUW2cWdxa$nzYgvK/ihYRuzoZJmZnSKmHho/HN4cN+H+sUcIbp+dM=','2026-06-13 17:49:48.765407',0,'voli_demo','','','voli.demo@aerobase.it',0,1,'2026-06-13 17:38:01.954793'),(27,'pbkdf2_sha256$1200000$kWd9P3QdkSG9JGHHznkk2W$UmZpqGwWc0igX9RraBFj/HdnBACNtBPC5Y143WW1HfM=','2026-06-13 17:51:14.626404',0,'bagagli_demo','','','bagagli.demo@aerobase.it',0,1,'2026-06-13 17:38:02.524327');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -811,7 +812,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('a9okzj75mfmhdi988e658e4eqqrcss2i','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wKXsC:7rURxdO_gN8drY5HI7bk85MsVHsrVfaqNaJl0jOKJYY','2026-05-20 08:44:52.218423'),('ls0d9poxkylsdjqyl77jma7ebwdvnz21','.eJxVjEEOwiAQRe_C2pDCAB1duu8ZCAODVA0kpV0Z765NutDtf-_9l_BhW4vfOi9-TuIitBGn35FCfHDdSbqHemsytrouM8ldkQftcmqJn9fD_TsooZdvTWyVBpM5AmVEBYyozehiRIOWHZkEGZSOyZGmbGBQyYKy5wHVqBHE-wMFEzdJ:1wYSGg:Gn2qf792ksJxe7fJaAhXBLmlu-WJpfKLU5R-dt3mGVQ','2026-06-27 17:35:38.504846'),('pkx1kv81ecxyagz614ul6my13e3sgo9b','.eJxVjMsOwiAQRf-FtSE8Bhlcuu83kAGmUjU0Ke3K-O_apAvd3nPOfYlI21rj1nmJUxEXocXpd0uUH9x2UO7UbrPMc1uXKcldkQftcpgLP6-H-3dQqddvjbY4ZEc5BA_FKqu1sjbYfC7AHpGTSjAGUAYCcvbICtA7BQZMojGL9we9Tzby:1wML3k:5SV3vpnE_-zDxQsWb7lYGLVCx8FOBXC7It-8Y-2Qijg','2026-05-25 07:28:12.037588');
+INSERT INTO `django_session` VALUES ('5yrudfjx2xeo2x2tqamudlhy7y24pu9e','.eJxVjEEOgjAQRe_StWmGoTDWpXvO0Mx0iqCmTSisjHdXEha6_e-9_zKBt3UKW01LmNVcDJI5_Y7C8ZHyTvTO-VZsLHldZrG7Yg9a7VA0Pa-H-3cwcZ2-tQNlwlG5TcyeGmhGdMkRSCMdeuQYe3Ajxx6BYgfSniF53wuiihKZ9wcRrDgb:1wYSVm:oMA9_5uKdxymk5tggM_LzJgT1WI8luyWm1WpOUViTb8','2026-06-27 17:51:14.634909'),('9fln0bjakclo12i2asz82rcpj9e5aych','.eJxVjEEOwiAQRe_C2pDCAB1duu8ZCAODVA0kpV0Z765NutDtf-_9l_BhW4vfOi9-TuIitBGn35FCfHDdSbqHemsytrouM8ldkQftcmqJn9fD_TsooZdvTWyVBpM5AmVEBYyozehiRIOWHZkEGZSOyZGmbGBQyYKy5wHVqBHE-wMFEzdJ:1wZG1Z:NYQXSDCZdqZG3J5g1Psg20n5NsjsdXwTwa38Q8TlBsQ','2026-06-29 22:43:21.104091'),('a9okzj75mfmhdi988e658e4eqqrcss2i','.eJxVjEEOwiAQRe_C2hCgU3Bcuu8ZmhkYpGpoUtqV8e7apAvd_vfef6mRtrWMW5NlnJK6KKtOvxtTfEjdQbpTvc06znVdJta7og_a9DAneV4P9--gUCvfOvYWPSTK1nDnIPc9hsDggMQAn6HzAQ1k9AbEo-04oHDIFLNgsN6p9wfDBDcn:1wKXsC:7rURxdO_gN8drY5HI7bk85MsVHsrVfaqNaJl0jOKJYY','2026-05-20 08:44:52.218423'),('pkx1kv81ecxyagz614ul6my13e3sgo9b','.eJxVjMsOwiAQRf-FtSE8Bhlcuu83kAGmUjU0Ke3K-O_apAvd3nPOfYlI21rj1nmJUxEXocXpd0uUH9x2UO7UbrPMc1uXKcldkQftcpgLP6-H-3dQqddvjbY4ZEc5BA_FKqu1sjbYfC7AHpGTSjAGUAYCcvbICtA7BQZMojGL9we9Tzby:1wML3k:5SV3vpnE_-zDxQsWb7lYGLVCx8FOBXC7It-8Y-2Qijg','2026-05-25 07:28:12.037588');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -824,4 +825,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-13 19:38:12
+-- Dump completed on 2026-06-24 23:22:21

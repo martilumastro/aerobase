@@ -396,6 +396,10 @@ python manage.py shell -c "from django.contrib.auth.models import User; credenzi
     <td align="center"><b>Gestione Bagagli</b><br><img src="img/Gestione%20Bagagli.png" width="350"></td>
     <td align="center"><b>Profilo Operatore</b><br><img src="img/Profilo%20Operatore.png" width="350"></td>
   </tr>
+  <tr>
+    <td align="center"><b>Tabellone Partenze</b><br><img src="img/Tabellone_partenze.png" width="350"></td>
+    <td align="center"></td>
+  </tr>
 </table>
 
 ---
